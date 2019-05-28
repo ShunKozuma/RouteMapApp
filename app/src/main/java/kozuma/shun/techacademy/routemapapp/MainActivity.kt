@@ -85,7 +85,7 @@ class MainActivity : MapActivity() {
         //友達リストボタンの追加
         val fab = FloatingActionButton(this)
         fab.setOnClickListener {
-            val intent = Intent(applicationContext, FriendsListActivity::class.java)
+            val intent = Intent(applicationContext, FriendActivity::class.java)
             startActivity(intent)
         }
         val fabimage = BitmapFactory.decodeResource(resources, R.drawable.plus)

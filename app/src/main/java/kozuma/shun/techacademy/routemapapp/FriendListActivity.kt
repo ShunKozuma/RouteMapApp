@@ -23,7 +23,6 @@ class FriendListActivity : AppCompatActivity(), ViewPager.OnPageChangeListener,F
 
 
     override fun onFragmentInteraction(uri: Uri) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +46,7 @@ class FriendListActivity : AppCompatActivity(), ViewPager.OnPageChangeListener,F
         val adapter = TagAdapter(supportFragmentManager, this)
         pager.adapter = adapter
         tabs.setupWithViewPager(pager)
+
         val tab: TabLayout.Tab = tabs.getTabAt(0)!!
         tab.customView = adapter.getTabView(tabs, 0)
 

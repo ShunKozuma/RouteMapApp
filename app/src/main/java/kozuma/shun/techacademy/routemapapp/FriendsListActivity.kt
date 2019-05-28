@@ -1,11 +1,17 @@
 package kozuma.shun.techacademy.routemapapp
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.view.View
 import android.widget.ListView
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_friend.*
+import kotlinx.android.synthetic.main.activity_friend_list.*
 import kotlinx.android.synthetic.main.activity_friends_list.*
+import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.list_friends.*
 
 class FriendsListActivity : AppCompatActivity() {
 
@@ -70,10 +76,21 @@ class FriendsListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends_list)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+
+/*
+        //友達一覧画面に遷移
+        friendListButton.setOnClickListener{
+            val intent = Intent(applicationContext, FriendsListActivity::class.java)
+            startActivity(intent)
         }
+
+        //友達許可画面に遷移
+        permissionButton.setOnClickListener {
+            val intent = Intent(applicationContext, FriendsPermissionActivity::class.java)
+            startActivity(intent)
+        }
+*/
+
 
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference

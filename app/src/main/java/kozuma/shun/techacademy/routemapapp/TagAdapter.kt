@@ -37,7 +37,6 @@ class TagAdapter(fm: FragmentManager, private val context: Context) : FragmentSt
         image.setImageResource(R.drawable.friend)
         return view
     }
-
     // タブの変更
     fun getTabView1(tabLayout: TabLayout, position: Int): View {
         // tab_item.xml を複数
@@ -50,5 +49,7 @@ class TagAdapter(fm: FragmentManager, private val context: Context) : FragmentSt
         image.setImageResource(R.drawable.friendplus)
         return view
     }
+
+
 
 }

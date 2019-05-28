@@ -23,14 +23,12 @@ class FragmentPage : Fragment() {
 
 
     }
-    //
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val page = arguments!!.getInt(PAGE, 0)
         // fragment_pageを複製しtextへページを表示
-        val view = inflater.inflate(R.layout.fragment_page, container, false)
-        view.findViewById<TextView>(R.id.textView).text = page.toString()
-
-
+        val view = inflater.inflate(R.layout.activity_friends_list, container, false)
+//        view.findViewById<TextView>(R.id.textView).text = page.toString()
 
         return view
 
