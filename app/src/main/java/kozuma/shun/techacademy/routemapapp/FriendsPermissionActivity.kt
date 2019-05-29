@@ -11,7 +11,7 @@ class FriendsPermissionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends_permission)
 
-        /*
+/*
         //友達一覧画面に遷移
         friendListButton.setOnClickListener{
             val intent = Intent(applicationContext, FriendsListActivity::class.java)
@@ -24,5 +24,6 @@ class FriendsPermissionActivity : AppCompatActivity() {
             startActivity(intent)
         }
         */
+
     }
 }

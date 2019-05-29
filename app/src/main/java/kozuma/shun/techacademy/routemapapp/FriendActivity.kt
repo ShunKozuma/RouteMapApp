@@ -19,7 +19,6 @@ class FriendActivity : AppCompatActivity() {
         pager.adapter = TabAdapter(supportFragmentManager, this)
         tab_layout.setupWithViewPager(pager)
 
-
         fabs.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()

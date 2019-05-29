@@ -9,7 +9,7 @@
         tools:context=".FriendsListActivity">
 
 
-    <!--LinearLayout
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/linear">
@@ -25,8 +25,45 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/permissionButton"
                 android:layout_weight="1"/>
-    </LinearLayout-->
+    </LinearLayout>
 
+    <!--android.support.v4.view.ViewPager
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/pagers">
+
+    </android.support.v4.view.ViewPager>
+
+        <android.support.design.widget.TabLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/tab_layouts">
+
+            <android.support.design.widget.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monday"/>
+
+            <android.support.design.widget.TabItem
+                    android:layout="@layout/activity_friends_permission"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tuesday"/>
+
+            <android.support.design.widget.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Wednesday"/>
+        </android.support.design.widget.TabLayout-->
+
+    <android.support.design.widget.FloatingActionButton
+            android:id="@+id/userFindButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/finduser"
+            app:backgroundTint="@color/colorPrimary" tools:ignore="MissingConstraints"/>
 
     <include
             android:id="@+id/include"

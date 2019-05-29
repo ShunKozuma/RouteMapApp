@@ -15,13 +15,6 @@ class FriendListActivity : AppCompatActivity(), ViewPager.OnPageChangeListener,F
 
 
 
-
-
-
-
-
-
-
     override fun onFragmentInteraction(uri: Uri) {
     }
 

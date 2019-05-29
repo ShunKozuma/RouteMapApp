@@ -1,11 +1,18 @@
 package kozuma.shun.techacademy.routemapapp
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.design.widget.TabLayout
+import android.support.v7.app.AlertDialog
 import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_friend.*
 import kotlinx.android.synthetic.main.activity_friend_list.*
@@ -19,6 +26,10 @@ class FriendsListActivity : AppCompatActivity() {
     private lateinit var mListView: ListView
     private lateinit var mFriendArrayList: ArrayList<Friends>
     private lateinit var mAdapter: FriendsListAdapter
+
+    //ログイン中のユーザID
+    val user = FirebaseAuth.getInstance().currentUser!!.uid
+
 
     private var mFriendRef: DatabaseReference? = null
 
@@ -54,22 +65,18 @@ class FriendsListActivity : AppCompatActivity() {
         }
 
         override fun onCancelled(p0: DatabaseError) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun onChildMoved(p0: DataSnapshot, p1: String?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
         }
 
         override fun onChildRemoved(p0: DataSnapshot) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,36 +84,72 @@ class FriendsListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_friends_list)
 
 
-/*
+
+        //ユーザー検索画面に遷移
+        userFindButton.setOnClickListener {
+            val intent = Intent(applicationContext, UserFindActivity::class.java)
+            startActivity(intent)
+        }
+
         //友達一覧画面に遷移
         friendListButton.setOnClickListener{
-            val intent = Intent(applicationContext, FriendsListActivity::class.java)
-            startActivity(intent)
+            friendlistclick()
+
         }
 
         //友達許可画面に遷移
         permissionButton.setOnClickListener {
-            val intent = Intent(applicationContext, FriendsPermissionActivity::class.java)
-            startActivity(intent)
+
+            permissionclick()
+
         }
-*/
+        //pagers.adapter = TabAdapter(supportFragmentManager, this)
+        //tab_layouts.setupWithViewPager(pagers)
 
 
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
         //ListViewの準備
-        mListView = findViewById(R.id.listView1)
+        mListView = this.findViewById(R.id.listView1)
         mAdapter = FriendsListAdapter(this)
+        mAdapter.context = this
+        mAdapter.getItemViewType(0)
         mFriendArrayList = ArrayList<Friends>()
         mAdapter.notifyDataSetChanged()
 
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
         mListView.adapter = mAdapter
+        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
+        mFriendRef!!.addChildEventListener(mEventListner)
 
-        mFriendRef = mDatabaseReference.child(UsersPATH).child("JpCvSGd48AOCkXeVYImSmFdQM3t2").child("friend")
+
+
+    }
+
+    fun friendlistclick(){
+        //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+        mFriendArrayList.clear()
+        mAdapter.setFriendArrayList(mFriendArrayList)
+        mAdapter.context = this
+        mListView.adapter = mAdapter
+        mAdapter.getbuttonId(0)
+        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListner)
     }
+
+    fun permissionclick(){
+        //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
+        mFriendArrayList.clear()
+        mAdapter.setFriendArrayList(mFriendArrayList)
+        mAdapter.context = this
+        mListView.adapter = mAdapter
+        mAdapter.getbuttonId(1)
+        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
+        mFriendRef!!.addChildEventListener(mEventListner)
+    }
+
 }

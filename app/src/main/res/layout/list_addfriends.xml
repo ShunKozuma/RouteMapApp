@@ -12,8 +12,8 @@
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/deleteButton"
-            android:text="取消"
+            android:id="@+id/addButton"
+            android:text="許可"
             android:layout_alignParentEnd="true"/>
 
 
