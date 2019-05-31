@@ -2,6 +2,7 @@ package kozuma.shun.techacademy.routemapapp
 
 import android.content.Context
 import android.content.DialogInterface
+import android.support.v4.content.ContextCompat.startActivity
 import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,10 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
     //addボタン選択ユーザのIDとPassを所得
     private lateinit var addname: String
     private lateinit var addid: String
+
+    private lateinit var mAdapter: FriendsListAdapter
+
+    var boolean: Any? = null
 
     init {
         mLayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -85,6 +90,7 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
                 convertView = mLayoutInflater.inflate(R.layout.list_addfriends, parent, false)
             }
 
+
             val addButton = convertView!!.findViewById<View>(R.id.addButton) as Button
             addButton.setOnClickListener {
                 //選択ユーザのIDとPassを所得
@@ -106,6 +112,7 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
                     show()
                 }
             }
+
 
             val nameText = convertView!!.findViewById<View>(R.id.nameTextView) as TextView
             nameText.text = mFriendArrayList[position].name
@@ -140,6 +147,8 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
         val data = HashMap<String, String>()
         data["name"] = addname
         addfriendRef.setValue(data)
+
+
     }
 
     fun deleteFriendDialog(){
@@ -162,6 +171,9 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
         val data = HashMap<String, String>()
         data["name"] = addname
         deladdRef.setValue(data)
+
+
+        //boolean
 
 
 

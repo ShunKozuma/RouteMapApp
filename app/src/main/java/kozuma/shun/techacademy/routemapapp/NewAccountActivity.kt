@@ -101,6 +101,14 @@ class NewAccountActivity : AppCompatActivity() {
                     data["name"] = name
                     userRef.setValue(data)
 
+
+                    val email = id_text.text.toString()
+                    val maildata = HashMap<String, String>()
+                    maildata["email"] = email
+
+                    userRef.setValue(maildata)
+
+
                     // 表示名をPrefarenceに保存する
                     saveName(name)
                 } else {

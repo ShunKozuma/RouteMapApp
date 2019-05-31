@@ -18,21 +18,14 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".UserFindActivity">
+        <activity android:name=".UserFindActivity"
+                  android:label="ユーザー検索">
         </activity>
         <activity android:name=".FriendActivity">
         </activity>
         <activity android:name=".FriendsPermissionActivity">
         </activity>
-        <activity android:name=".FriendsListActivity">
-
-            <!--
-            intent-filter>
-                <action android:name="android.intent.action.MAIN"/>s
-
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter
-            -->
+        <activity android:name=".FriendsListActivity" >
         </activity>
         <activity android:name=".FragmentPage">
         </activity>

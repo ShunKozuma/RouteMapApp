@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.activity_friend.*
 import kotlinx.android.synthetic.main.activity_friend_list.*
 import kotlinx.android.synthetic.main.activity_friends_list.*
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.list_addfriends.*
 import kotlinx.android.synthetic.main.list_friends.*
 
 class FriendsListActivity : AppCompatActivity() {
@@ -71,10 +72,12 @@ class FriendsListActivity : AppCompatActivity() {
         }
 
         override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+            mAdapter.notifyDataSetChanged()
 
         }
 
         override fun onChildRemoved(p0: DataSnapshot) {
+            mAdapter.notifyDataSetChanged()
         }
     }
 
@@ -82,6 +85,9 @@ class FriendsListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends_list)
+
+
+
 
 
 
@@ -127,10 +133,15 @@ class FriendsListActivity : AppCompatActivity() {
         mFriendRef!!.addChildEventListener(mEventListner)
 
 
+        mAdapter.boolean = mAdapter.notifyDataSetChanged()
+
 
     }
 
+
+
     fun friendlistclick(){
+
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
@@ -139,9 +150,11 @@ class FriendsListActivity : AppCompatActivity() {
         mAdapter.getbuttonId(0)
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListner)
+
     }
 
     fun permissionclick(){
+
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
