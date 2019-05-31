@@ -9,12 +9,12 @@
             android:id="@+id/nameTextView"
             android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-    <Button
+    <!--Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/deleteButton"
             android:text="取消"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"/-->
 
 
 </RelativeLayout>
