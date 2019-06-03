@@ -86,6 +86,7 @@ class MainActivity : MapActivity() {
         val fab = FloatingActionButton(this)
         fab.setOnClickListener {
             val intent = Intent(applicationContext, FriendsListActivity::class.java)
+            intent.putExtra( "button", "0" )
             startActivity(intent)
         }
 

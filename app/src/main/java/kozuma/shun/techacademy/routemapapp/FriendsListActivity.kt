@@ -2,6 +2,7 @@ package kozuma.shun.techacademy.routemapapp
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.PendingIntent.getActivity
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -32,7 +33,6 @@ class FriendsListActivity : AppCompatActivity() {
     private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var mListView: ListView
     private lateinit var mFriendArrayList: ArrayList<Friends>
-    private lateinit var mFriendArrayListNot: ArrayList<Friends>
     private lateinit var mAdapter: FriendsListAdapter
 
     //ログイン中のユーザID
@@ -54,14 +54,8 @@ class FriendsListActivity : AppCompatActivity() {
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key.toString()
             val friend = Friends(friend_uid ,name)
-            if(mbuttonId == 0){
-                mFriendArrayList.add(friend)
-            }else{
-                mFriendArrayListNot.add(friend)
-            }
-
+            mFriendArrayList.add(friend)
             mAdapter.notifyDataSetChanged()
-
 
         }
 
@@ -106,9 +100,7 @@ class FriendsListActivity : AppCompatActivity() {
 
         //友達許可画面に遷移
         permissionButton.setOnClickListener {
-
             NotFriendclick()
-
         }
         //pagers.adapter = TabAdapter(supportFragmentManager, this)
         //tab_layouts.setupWithViewPager(pagers)
@@ -123,47 +115,46 @@ class FriendsListActivity : AppCompatActivity() {
         mAdapter.context = this
         mAdapter.getItemViewType(0)
         mFriendArrayList = ArrayList<Friends>()
-        mFriendArrayListNot = ArrayList<Friends>()
+        //mFriendArrayListNot = ArrayList<Friends>()
         mAdapter.notifyDataSetChanged()
 
 
-        //友達一覧表示
-        FriendListclick()
+        val intent = intent
+        val button = intent.getStringExtra("button")
+        if( button.equals("0")){
+            //友達一覧表示
+            FriendListclick()
+        }else{
+            NotFriendclick()
+        }
+
 
         //ListViewを長押ししたときの処理
         mListView.setOnItemLongClickListener { parent, _, position, _ ->
             //選択ユーザのIDとPassを所得
-            addid = mFriendArrayListNot[position].friend_uid
-            addname = mFriendArrayListNot[position].name
+            addid = mFriendArrayList[position].friend_uid
+            addname = mFriendArrayList[position].name
+
+            // ダイアログを作成して表示
+            AlertDialog.Builder(this).apply {
+                setTitle("友達申請")
+                setMessage(addname+"の\n友達申請を許可しますか？")
+                setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                    // OKをタップしたときの処理
+                    FriendListDialog()
+                    Toast.makeText(context, "申請を許可しました！", Toast.LENGTH_LONG).show()
+                    finish()
+                    val intent = Intent(applicationContext, FriendsListActivity::class.java)
+                    intent.putExtra( "button", "1" )
+                    startActivity(intent)
 
 
-            // ダイアログを表示する
-            val builder = AlertDialog.Builder(this@FriendsListActivity)
-
-            builder.setTitle("友達申請")
-            builder.setMessage(addname+"の\n友達申請を許可しますか？")
-
-            println(addid)
-            println(addname)
-
-            builder.setPositiveButton("OK") { _, _ ->
-
-                if(mFriendRef != null){
-                    mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
-                    mFriendRef!!.removeEventListener(mEventListner)
-                }
-
-                // OKをタップしたときの処理
-                FriendListDialog()
-                Toast.makeText(this, "申請を許可しました！", Toast.LENGTH_LONG).show()
-
-
+                })
+                setNegativeButton("Cancel", null)
+                show()
             }
 
-            builder.setNegativeButton("CANCEL", null)
 
-            val dialog = builder.create()
-            dialog.show()
 
             true
         }
@@ -178,32 +169,31 @@ class FriendsListActivity : AppCompatActivity() {
             println(addid)
             println(addname)
 
-            // ダイアログを表示する
-            val builder = AlertDialog.Builder(this@FriendsListActivity)
-
-            builder.setTitle("友達取り消し")
-            builder.setMessage(addname+"の\n友達を取り消しますか？")
-
-            builder.setPositiveButton("OK") { _, _ ->
-                if(mFriendNotRef != null){
-                    mFriendNotRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
-                    mFriendNotRef!!.removeEventListener(mEventListner)
-
-                }
-                // OKをタップしたときの処理
-                NotFriendDialog()
-                Toast.makeText(this, "友達を取り消しました！", Toast.LENGTH_LONG).show()
+            // ダイアログを作成して表示
+            AlertDialog.Builder(this).apply {
+                setTitle("友達取り消し")
+                setMessage(addname+"の\n友達を取り消しますか？")
+                setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                    // OKをタップしたときの処理
+                    NotFriendDialog()
+                    Toast.makeText(context, "申請を許可しました！", Toast.LENGTH_LONG).show()
+                    finish()
+                    val intent = Intent(applicationContext, FriendsListActivity::class.java)
+                    intent.putExtra( "button", "0" )
+                    startActivity(intent)
+                })
+                setNegativeButton("Cancel", null)
+                show()
             }
 
-            builder.setNegativeButton("CANCEL", null)
-
-            val dialog = builder.create()
-            dialog.show()
 
             true
         }
 
+
+
     }
+
 
 
 
@@ -232,12 +222,12 @@ class FriendsListActivity : AppCompatActivity() {
         friendListButton.setBackgroundColor(GRAY)
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
         mAdapter.getbuttonId(1)
-        mFriendArrayListNot.clear()
-        mAdapter.setFriendArrayList(mFriendArrayListNot)
+        mFriendArrayList.clear()
+        mAdapter.setFriendArrayList(mFriendArrayList)
         mAdapter.context = this
         mListView.adapter = mAdapter
-        mFriendNotRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
-        mFriendNotRef!!.addChildEventListener(mEventListner)
+        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
+        mFriendRef!!.addChildEventListener(mEventListner)
     }
 
     fun FriendListDialog(){
@@ -282,13 +272,13 @@ class FriendsListActivity : AppCompatActivity() {
         //println(favoriteRef)
         addfriendRef.removeValue()
 
-
         //friend追加のパス
         val deladdRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend").child(addid)
         //フレンド追加のデータ
         val data = HashMap<String, String>()
         data["name"] = addname
         deladdRef.setValue(data)
+
 
 
     }
