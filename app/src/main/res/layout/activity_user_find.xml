@@ -21,7 +21,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/FindEditText"
-            android:hint="メールアドレス"
+            android:hint="ユーザーID"
+            android:text=""
             android:layout_weight="0.6"/>
 
     <Button
@@ -34,11 +35,27 @@
 
     </LinearLayout>
 
-    <TextView
-            android:layout_marginTop="130dp"
-            android:text=""
+    <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/FoundUserText" />
+            android:layout_height="match_parent"
+            android:id="@+id/CenterButton"
+            android:gravity="center" >
+        <TextView
+                android:layout_marginTop="130dp"
+                android:text=""
+                android:textSize="35dp"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/FoundUserText"/>
+        <Button
+                android:text="友達申請"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/AddFindButton"
+                android:visibility="invisible"
+        />
+    </LinearLayout>
 
 </RelativeLayout>

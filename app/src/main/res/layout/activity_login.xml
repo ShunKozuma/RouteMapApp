@@ -36,6 +36,7 @@
                 android:ems="10"
                 android:id="@+id/idText"
                 android:hint="ID"/>
+
         <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

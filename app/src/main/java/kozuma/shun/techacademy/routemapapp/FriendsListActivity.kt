@@ -32,16 +32,20 @@ class FriendsListActivity : AppCompatActivity() {
     private lateinit var mDatabaseReference: DatabaseReference
     private lateinit var mListView: ListView
     private lateinit var mFriendArrayList: ArrayList<Friends>
+    private lateinit var mFriendArrayListNot: ArrayList<Friends>
     private lateinit var mAdapter: FriendsListAdapter
 
     //ログイン中のユーザID
     val user = FirebaseAuth.getInstance().currentUser!!.uid
 
     private var mFriendRef: DatabaseReference? = null
+    private var mFriendNotRef: DatabaseReference? = null
 
     //addボタン選択ユーザのIDとPassを所得
     private lateinit var addname: String
     private lateinit var addid: String
+
+    private var mbuttonId = 0
 
     private val mEventListner = object : ChildEventListener{
 
@@ -50,8 +54,14 @@ class FriendsListActivity : AppCompatActivity() {
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key.toString()
             val friend = Friends(friend_uid ,name)
-            mFriendArrayList.add(friend)
+            if(mbuttonId == 0){
+                mFriendArrayList.add(friend)
+            }else{
+                mFriendArrayListNot.add(friend)
+            }
+
             mAdapter.notifyDataSetChanged()
+
 
         }
 
@@ -66,14 +76,15 @@ class FriendsListActivity : AppCompatActivity() {
         }
 
         override fun onChildRemoved(dataSnapshot: DataSnapshot) {
-            val map = dataSnapshot.value as Map<String, String>
-            val name = map["name"] ?: ""
-            val friend_uid = dataSnapshot.key.toString()
-            val friend = Friends(friend_uid ,name)
-            mFriendArrayList.remove(friend)
-            mAdapter.notifyDataSetChanged()
+//            val map = dataSnapshot.value as Map<String, String>
+//            val name = map["name"] ?: ""
+//            val friend_uid = dataSnapshot.key ?:""
+//            val friend = Friends(friend_uid ,name)
+//            mFriendArrayList.remove(friend)
+//            mAdapter.notifyDataSetChanged()
         }
     }
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,6 +123,7 @@ class FriendsListActivity : AppCompatActivity() {
         mAdapter.context = this
         mAdapter.getItemViewType(0)
         mFriendArrayList = ArrayList<Friends>()
+        mFriendArrayListNot = ArrayList<Friends>()
         mAdapter.notifyDataSetChanged()
 
 
@@ -121,10 +133,9 @@ class FriendsListActivity : AppCompatActivity() {
         //ListViewを長押ししたときの処理
         mListView.setOnItemLongClickListener { parent, _, position, _ ->
             //選択ユーザのIDとPassを所得
-            addid = mFriendArrayList[position].friend_uid
-            addname = mFriendArrayList[position].name
-            println(addid)
-            println(addname)
+            addid = mFriendArrayListNot[position].friend_uid
+            addname = mFriendArrayListNot[position].name
+
 
             // ダイアログを表示する
             val builder = AlertDialog.Builder(this@FriendsListActivity)
@@ -132,11 +143,21 @@ class FriendsListActivity : AppCompatActivity() {
             builder.setTitle("友達申請")
             builder.setMessage(addname+"の\n友達申請を許可しますか？")
 
+            println(addid)
+            println(addname)
+
             builder.setPositiveButton("OK") { _, _ ->
+
+                if(mFriendRef != null){
+                    mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
+                    mFriendRef!!.removeEventListener(mEventListner)
+                }
+
                 // OKをタップしたときの処理
                 FriendListDialog()
                 Toast.makeText(this, "申請を許可しました！", Toast.LENGTH_LONG).show()
-                
+
+
             }
 
             builder.setNegativeButton("CANCEL", null)
@@ -151,6 +172,7 @@ class FriendsListActivity : AppCompatActivity() {
         //ListViewを長押ししたときの処理
         mListView.setOnItemClickListener { parent, _, position, _ ->
             //選択ユーザのIDとPassを所得
+
             addid = mFriendArrayList[position].friend_uid
             addname = mFriendArrayList[position].name
             println(addid)
@@ -163,6 +185,11 @@ class FriendsListActivity : AppCompatActivity() {
             builder.setMessage(addname+"の\n友達を取り消しますか？")
 
             builder.setPositiveButton("OK") { _, _ ->
+                if(mFriendNotRef != null){
+                    mFriendNotRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
+                    mFriendNotRef!!.removeEventListener(mEventListner)
+
+                }
                 // OKをタップしたときの処理
                 NotFriendDialog()
                 Toast.makeText(this, "友達を取り消しました！", Toast.LENGTH_LONG).show()
@@ -183,6 +210,7 @@ class FriendsListActivity : AppCompatActivity() {
     fun FriendListclick(){
         //友達リスト
 
+        mbuttonId = 0
         friendListButton.setBackgroundColor(YELLOW)
         permissionButton.setBackgroundColor(GRAY)
         mAdapter.getbuttonId(0)
@@ -197,22 +225,23 @@ class FriendsListActivity : AppCompatActivity() {
     }
 
     fun NotFriendclick(){
-        //友達かもりすと
 
+        //友達かもりすと
+        mbuttonId = 1
         permissionButton.setBackgroundColor(YELLOW)
         friendListButton.setBackgroundColor(GRAY)
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
         mAdapter.getbuttonId(1)
-        //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-        mFriendArrayList.clear()
-        mAdapter.setFriendArrayList(mFriendArrayList)
+        mFriendArrayListNot.clear()
+        mAdapter.setFriendArrayList(mFriendArrayListNot)
         mAdapter.context = this
         mListView.adapter = mAdapter
-        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
-        mFriendRef!!.addChildEventListener(mEventListner)
+        mFriendNotRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
+        mFriendNotRef!!.addChildEventListener(mEventListner)
     }
 
     fun FriendListDialog(){
+
 
         //友達追加
         //ログインのユーザID
@@ -227,7 +256,6 @@ class FriendsListActivity : AppCompatActivity() {
         //println(favoriteRef)
         deladdRef.removeValue()
 
-
         //friend追加のパス
         val addfriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend").child(addid)
         //フレンド追加のデータ
@@ -239,6 +267,8 @@ class FriendsListActivity : AppCompatActivity() {
     }
 
     fun NotFriendDialog(){
+
+
         //友達取り消し
         //ログインのユーザID
         val user = FirebaseAuth.getInstance().currentUser!!.uid
@@ -264,3 +294,4 @@ class FriendsListActivity : AppCompatActivity() {
     }
 
 }
+

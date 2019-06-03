@@ -2,6 +2,7 @@ package kozuma.shun.techacademy.routemapapp
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_user_find.*
@@ -13,19 +14,25 @@ class UserFindActivity : AppCompatActivity() {
 
     private var mFriendRef: DatabaseReference? = null
 
-    private val mEventListner = object : ChildEventListener {
+    private var id: String? = null
 
-        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-//            val map = dataSnapshot.value as Map<String, String>
-//            val name = map["name"] ?: ""
+    private val mEventListner = object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            //            val map = dataSnapshot.value as Map<String, String>
+            id = dataSnapshot.key
+            var name = dataSnapshot.child("name").getValue()
+
 //            val friend_uid = dataSnapshot.key.toString()
-//
-//            //val friend = User(name, friendsArrayList, latitude, longitude, uid, senduser_id)
+
+//            val friend = User(name, friendsArrayList, latitude, longitude, uid, senduser_id)
 //            val friend = Friends(friend_uid ,name)
-            if(dataSnapshot != null){
-                FoundUserText.text = "います"
+            if(name != null){
+                AddFindButton.visibility = View.VISIBLE
+                FoundUserText.text = name.toString()
+
             }else{
-                FoundUserText.text = "お探しのユーザーは見つかりません。"
+                AddFindButton.visibility = View.INVISIBLE
+                FoundUserText.text = "お探しのユーザーは\n見つかりません。"
             }
 
         }
@@ -33,28 +40,60 @@ class UserFindActivity : AppCompatActivity() {
         override fun onCancelled(p0: DatabaseError) {
         }
 
-        override fun onChildMoved(p0: DataSnapshot, p1: String?) {
-        }
 
-        override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-
-        }
-
-        override fun onChildRemoved(p0: DataSnapshot) {
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_find)
 
+        val user = FirebaseAuth.getInstance().currentUser!!.uid
+
+        AddFindButton.setOnClickListener {
+
+            var loginname = ""
+            val postListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val map = dataSnapshot.value as Map<String, String>
+                    loginname = map["name"] ?: ""
+
+                    //friend申請のパス
+                    val addfriendRef = mDatabaseReference.child(UsersPATH).child(id.toString()).child("addfriend").child(user)
+                    //フレンド追加のデータ
+                    val data = HashMap<String, String>()
+                    data["name"] = loginname
+                    addfriendRef.setValue(data)
+
+                    AddFindButton.visibility = View.INVISIBLE
+                    FoundUserText.text = "登録致しました。"
+
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                }
+            }
+
+            var mLoginRef: DatabaseReference = mDatabaseReference.child(UsersPATH).child(user)
+
+            mLoginRef.addValueEventListener(postListener)
+
+
+
+        }
+
 
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
+
         FindButton.setOnClickListener {
-            mFriendRef = mDatabaseReference.child(UsersPATH)
-            mFriendRef!!.addChildEventListener(mEventListner)
+            if (FindEditText.text.toString().equals("")){
+                FoundUserText.text = "ユーザーIDを入力してください。"
+            }else{
+                mFriendRef = mDatabaseReference.child(UsersPATH).child(FindEditText.text.toString())
+                println(mFriendRef)
+                mFriendRef!!.addListenerForSingleValueEvent(mEventListner)
+            }
         }
 
     }
