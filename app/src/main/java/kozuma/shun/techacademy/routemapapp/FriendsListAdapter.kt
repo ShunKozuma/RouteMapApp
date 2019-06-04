@@ -57,6 +57,7 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
         var convertView = convertView
 
 
+        /*
         if ( buttonId == 0) {
             if(convertView == null){
                 convertView = mLayoutInflater.inflate(R.layout.list_friends, parent, false)
@@ -76,9 +77,17 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
             nameText.text = mFriendArrayList[position].name
 
         }
+        */
+
+        if(convertView == null){
+            convertView = mLayoutInflater.inflate(R.layout.list_addfriends, parent, false)
+        }
+
+
+        val nameText = convertView!!.findViewById<View>(R.id.nameTextView) as TextView
+        nameText.text = mFriendArrayList[position].name
 
         return convertView
-
 
 
     }
@@ -86,14 +95,5 @@ class FriendsListAdapter(context: Context): BaseAdapter() {
     fun setFriendArrayList(friendArrayList: ArrayList<Friends>){
         mFriendArrayList = friendArrayList
     }
-
-    fun setNotFriendArrayList(friendArrayList: ArrayList<Friends>){
-        mNotFriendArrayList = friendArrayList
-    }
-
-
-
-
-
 
 }

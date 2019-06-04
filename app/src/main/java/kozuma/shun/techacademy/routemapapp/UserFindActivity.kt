@@ -59,13 +59,20 @@ class UserFindActivity : AppCompatActivity() {
 
                     //friend申請のパス
                     val addfriendRef = mDatabaseReference.child(UsersPATH).child(id.toString()).child("addfriend").child(user)
-                    //フレンド追加のデータ
-                    val data = HashMap<String, String>()
-                    data["name"] = loginname
-                    addfriendRef.setValue(data)
 
-                    AddFindButton.visibility = View.INVISIBLE
-                    FoundUserText.text = "登録致しました。"
+                    if (addfriendRef == null) {
+                        //フレンド追加のデータ
+                        val data = HashMap<String, String>()
+                        data["name"] = loginname
+                        addfriendRef.setValue(data)
+
+                        AddFindButton.visibility = View.INVISIBLE
+                        FoundUserText.text = "登録致しました。"
+                    }else{
+                        FoundUserText.text = "すでに申請済みです。"
+
+                    }
+
 
                 }
 
