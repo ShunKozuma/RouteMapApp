@@ -18,15 +18,17 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".UserFindActivity"
-                  android:label="ユーザー検索">
-
+        <activity android:name=".Main2Activity">
+        </activity>
+        <activity
+                android:name=".UserFindActivity"
+                android:label="ユーザー検索">
         </activity>
         <activity android:name=".FriendActivity">
         </activity>
         <activity android:name=".FriendsPermissionActivity">
         </activity>
-        <activity android:name=".FriendsListActivity" >
+        <activity android:name=".FriendsListActivity">
         </activity>
         <activity android:name=".FragmentPage">
         </activity>
@@ -43,6 +45,7 @@
         </activity>
         <activity android:name=".MainActivity">
         </activity>
+        <activity android:name=".MapLayout"/>
     </application>
 
 </manifest>

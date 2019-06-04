@@ -16,11 +16,13 @@ class UserFindActivity : AppCompatActivity() {
 
     private var id: String? = null
 
+    private var name: Any? = null
+
     private val mEventListner = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             //            val map = dataSnapshot.value as Map<String, String>
             id = dataSnapshot.key
-            var name = dataSnapshot.child("name").getValue()
+            name = dataSnapshot.child("name").getValue()
 
 //            val friend_uid = dataSnapshot.key.toString()
 
@@ -60,18 +62,27 @@ class UserFindActivity : AppCompatActivity() {
                     //friend申請のパス
                     val addfriendRef = mDatabaseReference.child(UsersPATH).child(id.toString()).child("addfriend").child(user)
 
-                    if (addfriendRef == null) {
-                        //フレンド追加のデータ
+
+                        //フレンド申請を相手にだす
                         val data = HashMap<String, String>()
                         data["name"] = loginname
                         addfriendRef.setValue(data)
 
                         AddFindButton.visibility = View.INVISIBLE
                         FoundUserText.text = "登録致しました。"
-                    }else{
-                        FoundUserText.text = "すでに申請済みです。"
 
-                    }
+
+                        //自身の友達として追加する
+                        //ログインのユーザID
+                        val user = FirebaseAuth.getInstance().currentUser!!.uid
+                        //リファレンス
+                        mDatabaseReference = FirebaseDatabase.getInstance().reference
+                        //friend追加のパス
+                        val addRef = mDatabaseReference.child(UsersPATH).child(user).child("friend").child(FindEditText.text.toString())
+                        //フレンド追加のデータ
+                        val adddata = HashMap<String, String>()
+                        adddata["name"] = name.toString()
+                        addRef.setValue(adddata)
 
 
                 }

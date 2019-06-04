@@ -11,7 +11,12 @@ import android.widget.ListView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import jp.co.yahoo.android.maps.GeoPoint
+import jp.co.yahoo.android.maps.MapView
 import kotlinx.android.synthetic.main.activity_friends_list.*
+import jp.co.yahoo.android.maps.MyLocationOverlay
+
+
 
 class FriendsListActivity : AppCompatActivity() {
 
@@ -32,6 +37,13 @@ class FriendsListActivity : AppCompatActivity() {
     private var mbuttonId: Boolean = false
 
     private lateinit var button: String
+
+    //現在地取得
+    private var _overlay: MyLocationOverlay? = null
+    private var keido = 0.0 //現在地　経度
+    private var ido = 0.0 //現在地　緯度
+    private  var p: GeoPoint = GeoPoint(0,0)//現在地の取得
+
 
     private val mEventListener = object : ChildEventListener {
 
@@ -67,6 +79,7 @@ class FriendsListActivity : AppCompatActivity() {
 
         //ユーザー検索画面に遷移
         userFindButton.setOnClickListener {
+            finish()
             val intent = Intent(applicationContext, UserFindActivity::class.java)
             startActivity(intent)
         }
@@ -103,6 +116,26 @@ class FriendsListActivity : AppCompatActivity() {
             NotFriendclick()
         }
 
+
+        mListView.setOnItemClickListener { parent, view, position, id ->
+            addid = mFriendArrayList[position].friend_uid
+            addname = mFriendArrayList[position].name
+
+            //友達に位置情報の共有ダイアログ
+            AlertDialog.Builder(this).apply {
+                setTitle("現在地共有")
+                setMessage(addname + "に現在地を共有しますか？")
+                setPositiveButton("共有",DialogInterface.OnClickListener {_, _ ->
+                    location()
+
+                    Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
+                })
+
+                setNegativeButton("Cancel", null)
+                show()
+            }
+
+        }
 
         //ListViewを長押ししたときの処理
         mListView.setOnItemLongClickListener { parent, _, position, _ ->
@@ -252,5 +285,53 @@ class FriendsListActivity : AppCompatActivity() {
 
     }
 
+    fun location(){
+
+//        val senduserRef = mDatabaseReference.child(UsersPATH).child(user).child("senduser_id")
+//
+//        //フレンド追加のデータ
+//        val data = HashMap<String, String>()
+//
+//        //送信相手
+//        data["user_id"] = addid
+//        senduserRef.setValue(data)
+
+
+        var mapView = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
+
+        //MyLocationOverlayインスタンス作成
+        _overlay = MyLocationOverlay(applicationContext, mapView)
+
+        //現在位置取得開始
+        _overlay!!.enableMyLocation()
+
+        //位置が更新されると、地図の位置も変わるよう設定
+        _overlay!!.runOnFirstFix(Runnable {
+            if (mapView.mapController != null) {
+                //現在位置を取得
+                p = _overlay!!.myLocation
+
+                keido = p.latitude
+                ido = p.longitude
+                println(keido)
+                println(ido)
+
+                val locationdataRef = mDatabaseReference.child(UsersPATH).child(addid).child("location")
+
+                val datadouble = HashMap<String, String>()
+                //現在地情報をFirebaseに保存
+                datadouble["latitude"] = keido.toString()
+                datadouble["longitude"] = ido.toString()
+                datadouble["user_id"] = user
+
+                locationdataRef.setValue(datadouble)
+
+            }
+        })
+
+        //MapViewにMyLocationOverlayを追加。
+        mapView.getOverlays().add(_overlay)
+
+    }
 }
 
