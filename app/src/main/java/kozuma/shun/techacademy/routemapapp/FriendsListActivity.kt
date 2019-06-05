@@ -79,7 +79,6 @@ class FriendsListActivity : AppCompatActivity() {
 
         //ユーザー検索画面に遷移
         userFindButton.setOnClickListener {
-            finish()
             val intent = Intent(applicationContext, UserFindActivity::class.java)
             startActivity(intent)
         }

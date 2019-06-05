@@ -1,5 +1,6 @@
 package kozuma.shun.techacademy.routemapapp
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -96,7 +97,6 @@ class UserFindActivity : AppCompatActivity() {
             mLoginRef.addValueEventListener(postListener)
 
 
-
         }
 
 
@@ -115,4 +115,13 @@ class UserFindActivity : AppCompatActivity() {
         }
 
     }
+
+
+
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        val intent = Intent(applicationContext, FriendsListActivity::class.java)
+//        intent.putExtra( "button", "0" )
+//        startActivity(intent)
+//    }
 }
