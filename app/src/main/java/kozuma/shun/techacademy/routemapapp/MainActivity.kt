@@ -33,7 +33,7 @@ import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
 
 
-class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener, ARControllerListener {
+class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener, ARControllerListener {
 
     private var _overlay: MyLocationOverlay? = null //現在地
     private lateinit var mDatabaseReference: DatabaseReference
@@ -73,7 +73,9 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
 
     //ARControllerのインターフェース
     override fun ARControllerListenerOnPOIPick(p0: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        finish()
+        val intent = Intent(applicationContext, MainActivity::class.java)
+        startActivity(intent)
     }
 
     //NaviControllerのインターフェース
@@ -158,18 +160,30 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
 
 
         if(arjudge){
+
             //横向き固定
             this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             this.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+
             //ARControllerインスタンス作成
-            arController = ARController(this, this)
+            arController = ARController(this , this)
 
             //ARControllerをNaviControllerに設定
             naviController.setARController(arController)
 
             //案内処理を開始
             naviController.start()
+
+            //ボタンの配置可能！！！！！！
+        val btn = Button(this)
+        btn.text = "押すなよ"
+            btn.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            btn.gravity = Gravity.TOP
+
 
         }
 
@@ -271,13 +285,13 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
     }
 
 
-    override fun isRouteDisplayed(): Boolean {
+    fun isRouteDisplayed(): Boolean {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_main)
+
 
         context = this
 
@@ -294,6 +308,14 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
         locationdata()
 
     }
+
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        FirebaseAuth.getInstance().signOut()
+//        val intent = Intent(applicationContext, LoginActivity::class.java)
+//        startActivity(intent)
+//    }
+
 
     fun locationdata() {
 
@@ -330,7 +352,9 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         ArButton.text = "AR表示"
         ArButton.setOnClickListener {
-            ArView()
+            //ArView()
+            val intent = Intent(applicationContext, ARViewActivity::class.java)
+            startActivity(intent)
         }
         layout.addView(ArButton)
 

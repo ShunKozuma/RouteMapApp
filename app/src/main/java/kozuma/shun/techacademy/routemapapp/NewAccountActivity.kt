@@ -36,12 +36,14 @@ class NewAccountActivity : AppCompatActivity() {
 
         //ログイン画面に遷移
         login_screen_button.setOnClickListener{
+            finish()
             val intent = Intent(applicationContext, LoginActivity::class.java)
             startActivity(intent)
         }
 
         //新規登録画面に遷移
         custom_button.setOnClickListener {
+            finish()
             val intent = Intent(applicationContext, NewAccountActivity::class.java)
             startActivity(intent)
         }
