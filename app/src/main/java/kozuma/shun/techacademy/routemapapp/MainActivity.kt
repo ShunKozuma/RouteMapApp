@@ -35,6 +35,42 @@ import jp.co.yahoo.android.maps.routing.RouteOverlay
 
 class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener, ARControllerListener {
 
+    private var _overlay: MyLocationOverlay? = null //現在地
+    private lateinit var mDatabaseReference: DatabaseReference
+    private var mLocationRef: DatabaseReference? = null
+
+    //ログイン中のユーザID
+    val user = FirebaseAuth.getInstance().currentUser!!.uid
+
+    var context: Context? = null
+
+    //var longitude: String? = null
+    //var latitude: String? = null
+
+    lateinit var Map: MapView
+
+
+    //現在地のデータ
+    private lateinit var p: GeoPoint
+
+    //受信相手のデータ
+    var keido: Int = 0
+    var ido: Int = 0
+
+    //ボタン配置
+    lateinit var currentButton: FloatingActionButton
+
+    //Naviのインスタンス
+    lateinit var naviController: NaviController
+
+    //ARのインスタンス
+    lateinit var arController: ARController
+
+    //ARをよぶ
+    var arjudge = false
+
+
+
     //ARControllerのインターフェース
     override fun ARControllerListenerOnPOIPick(p0: Int) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -121,40 +157,25 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
         naviController.start()
 
 
+        if(arjudge){
+            //横向き固定
+            this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            this.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            //ARControllerインスタンス作成
+            arController = ARController(this, this)
+
+            //ARControllerをNaviControllerに設定
+            naviController.setARController(arController)
+
+            //案内処理を開始
+            naviController.start()
+
+        }
+
         return false
     }
 
-
-    private var _overlay: MyLocationOverlay? = null //現在地
-    private lateinit var mDatabaseReference: DatabaseReference
-    private var mLocationRef: DatabaseReference? = null
-
-    //ログイン中のユーザID
-    val user = FirebaseAuth.getInstance().currentUser!!.uid
-
-    var context: Context? = null
-
-    //var longitude: String? = null
-    //var latitude: String? = null
-
-    lateinit var Map: MapView
-
-
-    //現在地のデータ
-    private lateinit var p: GeoPoint
-
-    //受信相手のデータ
-    var keido: Int = 0
-    var ido: Int = 0
-
-    //ボタン配置
-    lateinit var currentButton: FloatingActionButton
-
-    //Naviのインスタンス
-    private lateinit var naviController: NaviController
-
-    //ARのインスタンス
-    private lateinit var arController: ARController
 
     private val mEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -183,8 +204,11 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
                 map()
                 Map.getOverlays().add(pinOverlay)
 
-                //地図移動
-                Map.mapController.animateTo(mid)
+                if(arjudge==false){
+                    //地図移動
+                    Map.mapController.animateTo(mid)
+                }
+
 
 
                 val popupOverlay = object : PopupOverlay() {
@@ -258,9 +282,6 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
         context = this
 
         map()
-
-
-
 
     }
 
@@ -338,14 +359,11 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
         fab.setImageBitmap(fabimage)
         layout.addView(fab)
 
-
-
         Map.addView(layout)
 
     }
 
     fun RouteFind() {
-
 
         //RouteOverlay作成
         val routeOverlay = RouteOverlay(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
@@ -390,11 +408,8 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
                 //経由点ピンを非表示
                 routeOverlay.setRoutePinVisible(false)
 
-
             }
         })
-
-
     }
 
     fun MyLocationData() {
@@ -424,19 +439,10 @@ class MainActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviContr
 
     fun ArView() {
 
+        locationdata()
+        RouteFind()
+        arjudge = true
 
-        //横向き固定
-        this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        this.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        //ARControllerインスタンス作成
-        arController = ARController(this, this)
-
-        //ARControllerをNaviControllerに設定
-        naviController.setARController(arController)
-
-        //案内処理を開始
-        naviController.start()
 
     }
 
