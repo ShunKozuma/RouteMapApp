@@ -9,9 +9,11 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.location.LocationManager
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.text.Layout
@@ -305,15 +307,34 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // パーミッションの許可状態を確認する
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                // 許可されている
-            } else {
-                // 許可されていないので許可ダイアログを表示する
-                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_REQUEST_CODE)
-            }
-        }
+//        // パーミッションの許可状態を確認する
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//                // 許可されている
+//            } else {
+//                // 許可されていないので許可ダイアログを表示する
+//                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_REQUEST_CODE)
+//            }
+//        }
+
+        // 位置情報を管理している LocationManager のインスタンスを生成
+//        var locationManager: LocationManager? = getSystemService(LOCATION_SERVICE) as LocationManager
+//        var locationProvider : String = ""
+//
+//        if (null !== locationManager)
+//        {
+//            // GPSが利用可能になっているかどうかをチェック
+//            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+//                locationProvider = LocationManager.GPS_PROVIDER
+//            } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+//                locationProvider = LocationManager.NETWORK_PROVIDER
+//            } else {
+//                // いずれも利用可能でない場合は、GPSを設定する画面に
+//                val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+//                startActivity(settingsIntent)
+//                return
+//            }
+//        }
 
         context = this
 
