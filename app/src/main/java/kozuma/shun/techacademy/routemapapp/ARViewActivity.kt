@@ -1,13 +1,17 @@
 package kozuma.shun.techacademy.routemapapp
 
+import android.Manifest
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Button
@@ -26,6 +30,8 @@ import kotlinx.android.synthetic.main.activity_friend.*
 class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
     ARControllerListener {
 
+
+    //private val PERMISSIONS_REQUEST_CODES = 100
 
     private var _overlay: MyLocationOverlay? = null //現在地
     private lateinit var mDatabaseReference: DatabaseReference
@@ -190,6 +196,19 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_arview)
+
+        // パーミッションの許可状態を確認する
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+//                // 許可されているREAD_EXTERNAL_STORAGE
+//                Log.d("ANDROID", "許可されている")
+//
+//            } else {
+//                Log.d("ANDROID", "許可されていない")
+//                // 許可されていないので許可ダイアログを表示する
+//                requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CODES)
+//            }
+//        }
 
 
         Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")

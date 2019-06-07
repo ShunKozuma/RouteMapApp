@@ -1,17 +1,21 @@
 package kozuma.shun.techacademy.routemapapp
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.text.Layout
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -33,7 +37,12 @@ import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
 
 
-class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener, ARControllerListener {
+class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
+    ARControllerListener {
+
+
+    private val PERMISSIONS_REQUEST_CODE = 100
+
 
     private var _overlay: MyLocationOverlay? = null //現在地
     private lateinit var mDatabaseReference: DatabaseReference
@@ -68,7 +77,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     //ARをよぶ
     var arjudge = false
-
 
 
     //ARControllerのインターフェース
@@ -135,7 +143,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     }
 
 
-
     //Routeのインターフェース
     //ルート検索が正常に終了しなかった場合
     override fun errorRouteSearch(arg0: RouteOverlay, arg1: Int): Boolean {
@@ -159,7 +166,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         naviController.start()
 
 
-        if(arjudge){
+        if (arjudge) {
 
             //横向き固定
             this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -167,7 +174,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
 
             //ARControllerインスタンス作成
-            arController = ARController(this , this)
+            arController = ARController(this, this)
 
             //ARControllerをNaviControllerに設定
             naviController.setARController(arController)
@@ -175,20 +182,26 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             //案内処理を開始
             naviController.start()
 
-            //ボタンの配置可能！！！！！！
-        val btn = Button(this)
-        btn.text = "押すなよ"
-            btn.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            btn.gravity = Gravity.TOP
-
 
         }
 
         return false
     }
+
+//    private val mEvent = object : ValueEventListener{
+//        override fun onCancelled(p0: DatabaseError) {
+//
+//        }
+//
+//        override fun onDataChange(dataSnapshot: DataSnapshot) {
+//            val map = dataSnapshot.value as Map<String, String>
+//            val nowfriendname = map["name"] ?: ""
+//
+//            println(nowfriendname)
+//
+//        }
+//
+//    }
 
 
     private val mEventListener = object : ValueEventListener {
@@ -218,11 +231,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 map()
                 Map.getOverlays().add(pinOverlay)
 
-                if(arjudge==false){
-                    //地図移動
-                    Map.mapController.animateTo(mid)
-                }
-
+//                if(arjudge==false){
+//                    //地図移動
+//                    Map.mapController.animateTo(mid)
+//                }
 
 
                 val popupOverlay = object : PopupOverlay() {
@@ -235,6 +247,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                             setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
                                 RouteFind()
 
+//
                                 /*
                                 //AR表示ボタンの追加
                                 val ArButton = Button(context)
@@ -256,6 +269,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
                     }
                 }
+
                 Map.getOverlays().add(popupOverlay);
                 pinOverlay.setOnFocusChangeListener(popupOverlay);
                 pinOverlay.addPoint(mid, "OOさん", "東京ミッドタウンについて")
@@ -275,6 +289,9 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 }
                 Map.addView(shareUser)
 
+                //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child(user_id)
+                //mLocationRef!!.addValueEventListener(mEvent)
+
             }
 
         }
@@ -285,13 +302,18 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     }
 
 
-    fun isRouteDisplayed(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // パーミッションの許可状態を確認する
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                // 許可されている
+            } else {
+                // 許可されていないので許可ダイアログを表示する
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_REQUEST_CODE)
+            }
+        }
 
         context = this
 
@@ -302,19 +324,14 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     override fun onResume() {
         super.onResume()
 
+
         //マップ表示
         map()
         //受信
         locationdata()
 
-    }
 
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        FirebaseAuth.getInstance().signOut()
-//        val intent = Intent(applicationContext, LoginActivity::class.java)
-//        startActivity(intent)
-//    }
+    }
 
 
     fun locationdata() {
@@ -355,6 +372,8 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             //ArView()
             val intent = Intent(applicationContext, ARViewActivity::class.java)
             startActivity(intent)
+
+
         }
         layout.addView(ArButton)
 
@@ -362,7 +381,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         //現在地を表示するボタン
         currentButton = FloatingActionButton(this)
         currentButton.setOnClickListener {
+
             MyLocationData()
+
+
         }
         //現在地画像
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.now)
@@ -386,6 +408,27 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         Map.addView(layout)
 
     }
+
+//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+//        when (requestCode) {
+//            PERMISSIONS_REQUEST_CODE -> {
+//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // ユーザーが許可したとき
+//                    MyLocationData()
+//                }
+//                return
+//            }
+//            PERMISSIONS_REQUEST_CODES -> {
+//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    // ユーザーが許可したとき
+//                    val intent = Intent(applicationContext, ARViewActivity::class.java)
+//                    startActivity(intent)
+//                }
+//                return
+//            }
+//        }
+//    }
+
 
     fun RouteFind() {
 
@@ -449,9 +492,9 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 //現在位置を取得
                 p = _overlay!!.myLocation
 
-
                 //地図移動
                 Map.mapController.animateTo(p)
+
 
             }
         })
@@ -460,16 +503,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         Map.overlays.add(_overlay)
 
     }
-
-    fun ArView() {
-
-        locationdata()
-        RouteFind()
-        arjudge = true
-
-
-    }
-
 
 }
 
