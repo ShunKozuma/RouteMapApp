@@ -31,8 +31,6 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
     ARControllerListener {
 
 
-    //private val PERMISSIONS_REQUEST_CODES = 100
-
     private var _overlay: MyLocationOverlay? = null //現在地
     private lateinit var mDatabaseReference: DatabaseReference
     private var mLocationRef: DatabaseReference? = null
@@ -54,11 +52,13 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
 
     lateinit var Map: MapView
 
+    private val PERMISSIONS_REQUEST_CODE = 100
+
     //ARControllerのインターフェース
     override fun ARControllerListenerOnPOIPick(p0: Int) {
-        finish()
-        val intent = Intent(applicationContext, MainActivity::class.java)
-        startActivity(intent)
+//        finish()
+//        val intent = Intent(applicationContext, MainActivity::class.java)
+//        startActivity(intent)
     }
 
     //NaviControllerのインターフェース
@@ -198,19 +198,18 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
         //setContentView(R.layout.activity_arview)
 
         // パーミッションの許可状態を確認する
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-//                // 許可されているREAD_EXTERNAL_STORAGE
-//                Log.d("ANDROID", "許可されている")
-//
-//            } else {
-//                Log.d("ANDROID", "許可されていない")
-//                // 許可されていないので許可ダイアログを表示する
-//                requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CODES)
-//            }
-//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                // 許可されていないので許可ダイアログを表示する
+                requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CODE)
+            } else {
+                ARView()
+            }
+        }
 
+    }
 
+    fun ARView() {
         Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
 
 
@@ -261,4 +260,22 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
             }
         })
     }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            100 -> { //ActivityCompat#requestPermissions()の第2引数で指定した値
+                if (grantResults.size > 0 && grantResults[0] === PackageManager.PERMISSION_GRANTED) {
+                    //許可された場合の処理
+                    ARView()
+                } else {
+                    //拒否された場合の処理
+                    Toast.makeText(this, "AR表示機能が正しく動作しません。", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 }
+
+

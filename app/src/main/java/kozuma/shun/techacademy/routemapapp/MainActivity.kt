@@ -18,10 +18,7 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AlertDialog
 import android.text.Layout
 import android.util.Log
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -307,50 +304,60 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        // パーミッションの許可状態を確認する
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//                // 許可されている
-//            } else {
-//                // 許可されていないので許可ダイアログを表示する
-//                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_REQUEST_CODE)
-//            }
-//        }
-
-        // 位置情報を管理している LocationManager のインスタンスを生成
-//        var locationManager: LocationManager? = getSystemService(LOCATION_SERVICE) as LocationManager
-//        var locationProvider : String = ""
-//
-//        if (null !== locationManager)
-//        {
-//            // GPSが利用可能になっているかどうかをチェック
-//            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-//                locationProvider = LocationManager.GPS_PROVIDER
-//            } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-//                locationProvider = LocationManager.NETWORK_PROVIDER
-//            } else {
-//                // いずれも利用可能でない場合は、GPSを設定する画面に
-//                val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-//                startActivity(settingsIntent)
-//                return
-//            }
-//        }
-
         context = this
 
-        map()
+        // パーミッションの許可状態を確認する
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // 許可されていないので許可ダイアログを表示する
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PERMISSIONS_REQUEST_CODE)
+            }
+        }
+
+        // 位置情報を管理している LocationManager のインスタンスを生成
+        var locationManager: LocationManager? = getSystemService(LOCATION_SERVICE) as LocationManager
+        var locationProvider: String = ""
+
+        if (null !== locationManager) {
+            // GPSが利用可能になっているかどうかをチェック
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationProvider = LocationManager.GPS_PROVIDER
+            } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locationProvider = LocationManager.NETWORK_PROVIDER
+            } else {
+                // いずれも利用可能でない場合は、GPSを設定する画面に
+                //友達に位置情報の共有ダイアログ
+                AlertDialog.Builder(this).apply {
+                    //setTitle("位置情報の有効化")
+                    setMessage("デバイスの位置情報をONにしてください。")
+                    setPositiveButton("設定画面へ", DialogInterface.OnClickListener { _, _ ->
+                        val settingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                        startActivity(settingsIntent)
+
+                    })
+
+                    setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, which ->
+                        Toast.makeText(context, "現在地を扱う機能が正しく動作しません。", Toast.LENGTH_LONG).show()
+                    })
+                    show()
+                }
+
+
+
+                return
+            }
+        }
+
 
     }
 
     override fun onResume() {
         super.onResume()
 
-
         //マップ表示
         map()
         //受信
         locationdata()
-
 
     }
 
@@ -402,10 +409,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         //現在地を表示するボタン
         currentButton = FloatingActionButton(this)
         currentButton.setOnClickListener {
-
             MyLocationData()
-
-
         }
         //現在地画像
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.now)
@@ -426,29 +430,25 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         fab.setImageBitmap(fabimage)
         layout.addView(fab)
 
+
         Map.addView(layout)
 
     }
 
-//    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-//        when (requestCode) {
-//            PERMISSIONS_REQUEST_CODE -> {
-//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    // ユーザーが許可したとき
-//                    MyLocationData()
-//                }
-//                return
-//            }
-//            PERMISSIONS_REQUEST_CODES -> {
-//                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    // ユーザーが許可したとき
-//                    val intent = Intent(applicationContext, ARViewActivity::class.java)
-//                    startActivity(intent)
-//                }
-//                return
-//            }
-//        }
-//    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.getItemId()) {
+            R.id.action_settings -> {
+                val intent = Intent(applicationContext, SettingActivity::class.java)
+                startActivity(intent)
+            }
+        }// ボタンをタップした際の処理を記述
+        return true
+    }
 
 
     fun RouteFind() {
@@ -523,6 +523,22 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         //MapViewにMyLocationOverlayを追加。
         Map.overlays.add(_overlay)
 
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            100 -> { //ActivityCompat#requestPermissions()の第2引数で指定した値
+                if (grantResults.size > 0 && grantResults[0] === PackageManager.PERMISSION_GRANTED) {
+                    //許可された場合の処理
+                    Toast.makeText(this, "現在地へのアクセスを許可しました。", Toast.LENGTH_LONG).show()
+                } else {
+                    //拒否された場合の処理
+                    Toast.makeText(this, "現在地を扱う機能が正しく動作しません。", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
 }
