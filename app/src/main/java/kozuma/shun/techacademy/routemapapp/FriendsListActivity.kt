@@ -96,6 +96,7 @@ class FriendsListActivity : AppCompatActivity() {
         //tab_layouts.setupWithViewPager(pagers)
 
 
+
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 

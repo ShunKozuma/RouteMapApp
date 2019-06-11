@@ -18,9 +18,9 @@ class SettingActivity : AppCompatActivity() {
 
         idText.text = user
 
-        logoutButton.setOnClickListener { v ->
-            FirebaseAuth.getInstance().signOut()
-            Snackbar.make(v, "ログアウトしました", Snackbar.LENGTH_LONG).show()
-        }
+//        logoutButton.setOnClickListener { v ->
+//            FirebaseAuth.getInstance().signOut()
+//            Snackbar.make(v, "ログアウトしました", Snackbar.LENGTH_LONG).show()
+//        }
     }
 }

@@ -1,6 +1,7 @@
 package kozuma.shun.techacademy.routemapapp
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -15,7 +16,14 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.support.design.widget.FloatingActionButton
+import android.support.design.widget.NavigationView
+import android.support.design.widget.Snackbar
+import android.support.v4.app.Fragment
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.Toolbar
 import android.text.Layout
 import android.util.Log
 import android.view.*
@@ -34,11 +42,16 @@ import jp.co.yahoo.android.maps.ar.ARController
 import jp.co.yahoo.android.maps.ar.ARControllerListener
 import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
+import jp.co.yahoo.android.maps.weather.WeatherOverlay
+import kotlinx.android.synthetic.main.nav_header_main.*
+import org.w3c.dom.Text
 
 
 class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
-    ARControllerListener {
+    ARControllerListener, WeatherOverlay.WeatherOverlayListener, NavigationView.OnNavigationItemSelectedListener  {
 
+
+    private lateinit var mToolbar: Toolbar
 
     private val PERMISSIONS_REQUEST_CODE = 100
 
@@ -48,7 +61,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     private var mLocationRef: DatabaseReference? = null
 
     //ログイン中のユーザID
-    val user = FirebaseAuth.getInstance().currentUser!!.uid
+    lateinit var user: String
 
     var context: Context? = null
 
@@ -77,6 +90,23 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     //ARをよぶ
     var arjudge = false
 
+    //ログインユーザーの名前
+    var user_name: String? = null
+    lateinit var navUsername : TextView
+
+    //共有中の友達
+    var nowfriendname: String? = null
+
+
+
+    //WeatherOverlayのインターフェース
+    override fun finishUpdateWeather(p0: WeatherOverlay?) {
+
+    }
+
+    override fun errorUpdateWeather(p0: WeatherOverlay?, p1: Int) {
+
+    }
 
     //ARControllerのインターフェース
     override fun ARControllerListenerOnPOIPick(p0: Int) {
@@ -187,20 +217,92 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         return false
     }
 
-//    private val mEvent = object : ValueEventListener{
-//        override fun onCancelled(p0: DatabaseError) {
+    private val mEventname = object : ValueEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+
+        }
+
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val map = dataSnapshot.value as Map<String,String>
+            user_name = map["name"] ?: ""
+
+        }
+
+    }
+
+    private val mEvent = object : ValueEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+
+        }
+
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val map = dataSnapshot.value as Map<String, String>
+            nowfriendname = map["name"] ?: ""
+
+            navUsername.text = user_name
+
+            //相手の現在地をピンで表示
+            val mid = GeoPoint(keido, ido)
+            val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
+            map()
+            Map.getOverlays().add(pinOverlay)
+
+            val popupOverlay = object : PopupOverlay() {
+                override fun onTap(item: OverlayItem?) {
+                    //ポップアップをタッチした際の処理
+                    //友達に位置情報の共有ダイアログ
+                    AlertDialog.Builder(context as Activity).apply {
+                        setTitle("ルート探索")
+                        setMessage(nowfriendname + "ルートを探索しますか？")
+                        setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
+                            RouteFind()
+
 //
-//        }
-//
-//        override fun onDataChange(dataSnapshot: DataSnapshot) {
-//            val map = dataSnapshot.value as Map<String, String>
-//            val nowfriendname = map["name"] ?: ""
-//
-//            println(nowfriendname)
-//
-//        }
-//
-//    }
+                            /*
+                            //AR表示ボタンの追加
+                            val ArButton = Button(context)
+                            ArButton.layoutParams =
+                                LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                            ArButton.text = "AR表示"
+                            ArButton.setOnClickListener {
+                                RouteFind()
+                            }
+                            Map.addView(ArButton)
+                            */
+
+                            Toast.makeText(context, "ルートを表示致しました！", Toast.LENGTH_LONG).show()
+                        })
+
+                        setNegativeButton("Cancel", null)
+                        show()
+                    }
+
+                }
+            }
+
+            Map.getOverlays().add(popupOverlay)
+            pinOverlay.setOnFocusChangeListener(popupOverlay)
+            pinOverlay.addPoint(mid, nowfriendname, "")
+
+            //共有中のユーザー表示
+            val shareUser = TextView(context)
+            shareUser.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            shareUser.text = "現在地を受信中"
+            shareUser.gravity = Gravity.TOP
+            shareUser.setBackgroundColor(Color.GRAY)
+            shareUser.setOnClickListener {
+                //地図移動
+                Map.mapController.animateTo(mid)
+            }
+            Map.addView(shareUser)
+
+
+        }
+
+    }
 
 
     private val mEventListener = object : ValueEventListener {
@@ -224,72 +326,72 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 println(keido)
                 ido = longitude.replace(".", "").toInt()
 
-                //相手の現在地をピンで表示
-                val mid = GeoPoint(keido, ido)
-                val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
-                map()
-                Map.getOverlays().add(pinOverlay)
+//                //相手の現在地をピンで表示
+//                val mid = GeoPoint(keido, ido)
+//                val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
+//                map()
+//                Map.getOverlays().add(pinOverlay)
 
 //                if(arjudge==false){
 //                    //地図移動
 //                    Map.mapController.animateTo(mid)
 //                }
+                mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("friend").child(user_id)
+                mLocationRef!!.addListenerForSingleValueEvent(mEvent)
 
 
-                val popupOverlay = object : PopupOverlay() {
-                    override fun onTap(item: OverlayItem?) {
-                        //ポップアップをタッチした際の処理
-                        //友達に位置情報の共有ダイアログ
-                        AlertDialog.Builder(context as Activity).apply {
-                            setTitle("ルート探索")
-                            setMessage("OOさんへの" + "ルートを探索しますか？")
-                            setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
-                                RouteFind()
-
+//                val popupOverlay = object : PopupOverlay() {
+//                    override fun onTap(item: OverlayItem?) {
+//                        //ポップアップをタッチした際の処理
+//                        //友達に位置情報の共有ダイアログ
+//                        AlertDialog.Builder(context as Activity).apply {
+//                            setTitle("ルート探索")
+//                            setMessage(nowfriendname + "ルートを探索しますか？")
+//                            setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
+//                                RouteFind()
 //
-                                /*
-                                //AR表示ボタンの追加
-                                val ArButton = Button(context)
-                                ArButton.layoutParams =
-                                    LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                                ArButton.text = "AR表示"
-                                ArButton.setOnClickListener {
-                                    RouteFind()
-                                }
-                                Map.addView(ArButton)
-                                */
+////
+//                                /*
+//                                //AR表示ボタンの追加
+//                                val ArButton = Button(context)
+//                                ArButton.layoutParams =
+//                                    LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+//                                ArButton.text = "AR表示"
+//                                ArButton.setOnClickListener {
+//                                    RouteFind()
+//                                }
+//                                Map.addView(ArButton)
+//                                */
+//
+//                                Toast.makeText(context, "ルートを表示致しました！", Toast.LENGTH_LONG).show()
+//                            })
+//
+//                            setNegativeButton("Cancel", null)
+//                            show()
+//                        }
+//
+//                    }
+//                }
+//
+//                Map.getOverlays().add(popupOverlay);
+//                pinOverlay.setOnFocusChangeListener(popupOverlay);
+//                pinOverlay.addPoint(mid, nowfriendname, "東京ミッドタウンについて")
 
-                                Toast.makeText(context, "ルートを表示致しました！", Toast.LENGTH_LONG).show()
-                            })
+//                //共有中のユーザー表示
+//                val shareUser = TextView(context)
+//                shareUser.layoutParams = LinearLayout.LayoutParams(
+//                    LinearLayout.LayoutParams.WRAP_CONTENT,
+//                    LinearLayout.LayoutParams.WRAP_CONTENT
+//                )
+//                shareUser.text = "現在地を受信中"
+//                shareUser.gravity = Gravity.TOP
+//                shareUser.setBackgroundColor(Color.GRAY)
+//                shareUser.setOnClickListener {
+//                    //地図移動
+//                    Map.mapController.animateTo(mid)
+//                }
+//                Map.addView(shareUser)
 
-                            setNegativeButton("Cancel", null)
-                            show()
-                        }
-
-                    }
-                }
-
-                Map.getOverlays().add(popupOverlay);
-                pinOverlay.setOnFocusChangeListener(popupOverlay);
-                pinOverlay.addPoint(mid, "OOさん", "東京ミッドタウンについて")
-
-                //共有中のユーザー表示
-                val shareUser = TextView(context)
-                shareUser.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                shareUser.text = "現在地を受信中"
-                shareUser.gravity = Gravity.TOP
-                shareUser.setBackgroundColor(Color.GRAY)
-                shareUser.setOnClickListener {
-                    //地図移動
-                    Map.mapController.animateTo(mid)
-                }
-                Map.addView(shareUser)
-
-                //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child(user_id)
-                //mLocationRef!!.addValueEventListener(mEvent)
 
             }
 
@@ -304,7 +406,38 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
+        setContentView(R.layout.activity_main)
+
+
+        //FrameLayoutにマップ表示
+        val mainmap = findViewById<FrameLayout>(R.id.maps)
+        mainmap.addView(Map)
+
+
+        user = FirebaseAuth.getInstance().currentUser!!.uid
+
+        //Firebase
+        mDatabaseReference = FirebaseDatabase.getInstance().reference
+
+        //ログインユーザーの名前呼び出し
+        mLocationRef = mDatabaseReference.child(UsersPATH).child(user)
+        mLocationRef!!.addListenerForSingleValueEvent(mEventname)
+
+        //NavigationdrawerのユーザID
+        val navigation : NavigationView  = findViewById(R.id.nav_view)
+        val headerView : View = navigation.getHeaderView(0)
+        val navUserid : TextView = headerView.findViewById(R.id.nav_id)
+        navUsername = headerView.findViewById(R.id.nav_name)
+
+        navUsername.text = user_name
+        navUserid.text = user
+
+
+
         context = this
+
+
 
         // パーミッションの許可状態を確認する
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -348,6 +481,34 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             }
         }
 
+        //WeatherOverlayを作成
+        val weatherOverlay =  WeatherOverlay(this)
+
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+
+        // トグルスイッチの生成
+        val switch1 = Switch(this)
+        // トグルスイッチにイベントを設定
+        switch1.setOnCheckedChangeListener { button, isChecked ->
+            if (isChecked) {
+                //MapViewにWeatherOverlayを追加
+
+
+                //WeatherOverlayListenerを設定
+                weatherOverlay.setWeatherOverlayListener(this)
+                Map.getOverlays().add(weatherOverlay)
+            }else{
+                Map.getOverlays().remove(weatherOverlay)
+            }
+        }
+        // トグルスイッチを配置するメニューを取得
+        val menuItem2 = navigationView.menu.findItem(R.id.nav_rain)
+        // 取得したメニューにトグルスイッチを設定
+        menuItem2.actionView = switch1
+
+
+        navigationView.setNavigationItemSelectedListener(this)
+
 
     }
 
@@ -364,8 +525,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     fun locationdata() {
 
-        //Firebase
-        mDatabaseReference = FirebaseDatabase.getInstance().reference
 
         mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
         mLocationRef!!.addValueEventListener(mEventListener)
@@ -376,8 +535,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     fun map() {
 
         //地図を表示
-        Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
-        setContentView(Map)
+//        Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
+//        setContentView(Map)
+
+
 
 
         val layout = LinearLayout(this)
@@ -435,20 +596,57 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     }
 
+    override fun onBackPressed() {
+        val drawer = DrawerLayout(this)
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.activity_main_drawer, menu)
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.getItemId()) {
-            R.id.action_settings -> {
-                val intent = Intent(applicationContext, SettingActivity::class.java)
+
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        // Handle navigation view item clicks here.
+        val id = item.itemId
+
+        when(id){
+            R.id.nav_map -> {
+                Map.setMapType(0)
+            }
+            R.id.nav_map_air -> {
+                Map.setMapType(8)//地図の種類変更
+            }
+            R.id.nav_rain -> {
+            }
+            R.id.nav_share -> {
+            }
+            R.id.nav_find -> {
+                val intent = Intent(applicationContext, UserFindActivity::class.java)
                 startActivity(intent)
             }
-        }// ボタンをタップした際の処理を記述
+            R.id.nav_logout -> {
+                FirebaseAuth.getInstance().signOut()
+                Toast.makeText(context, "ログアウトしました", Toast.LENGTH_LONG).show()
+                finish()
+                val intent = Intent(applicationContext, LoginActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
+        val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+        drawer.closeDrawer(GravityCompat.START)
         return true
     }
+
+
 
 
     fun RouteFind() {

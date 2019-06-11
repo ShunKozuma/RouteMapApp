@@ -35,6 +35,12 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
         // FirebaseAuthのオブジェクトを取得する
         mAuth = FirebaseAuth.getInstance()
 
+        val nowuser = FirebaseAuth.getInstance().currentUser
+        if(nowuser != null){
+            val intent = Intent(applicationContext, MainActivity::class.java)
+            startActivity(intent)
+        }
+
         //ログイン画面に遷移
         loginScreenButton.setOnClickListener{
             finish()
@@ -83,7 +89,7 @@ class LoginActivity : AppCompatActivity(), View.OnClickListener {
                 // Activityを閉じる
                 finish()
 
-                //Mainに遷移
+//                //Mainに遷移
                 val intent = Intent(applicationContext, MainActivity::class.java)
                 startActivity(intent)
 
