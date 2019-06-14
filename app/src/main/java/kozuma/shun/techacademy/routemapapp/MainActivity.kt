@@ -99,6 +99,8 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
 
 
+
+
     //WeatherOverlayのインターフェース
     override fun finishUpdateWeather(p0: WeatherOverlay?) {
 
@@ -237,9 +239,11 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             val map = dataSnapshot.value as Map<String, String>
+            val user_id = dataSnapshot.key
             nowfriendname = map["name"] ?: ""
 
             navUsername.text = user_name
+
 
             //相手の現在地をピンで表示
             val mid = GeoPoint(keido, ido)
@@ -282,7 +286,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
             Map.getOverlays().add(popupOverlay)
             pinOverlay.setOnFocusChangeListener(popupOverlay)
-            pinOverlay.addPoint(mid, nowfriendname, "")
+            pinOverlay.addPoint(mid, nowfriendname, "なし")
 
             //共有中のユーザー表示
             val shareUser = TextView(context)
@@ -297,6 +301,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 //地図移動
                 Map.mapController.animateTo(mid)
             }
+
             Map.addView(shareUser)
 
 
@@ -316,9 +321,11 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 val longitude = map["longitude"] ?: ""
 
 
-                println(user_id)
                 println(latitude)
                 println(longitude)
+                println(user_id)
+
+
 
                 //経度緯度情報に小数点がふくまれるGeoPointはInt型の引数のため変更
                 //小数点を削除（置換）し、Int型にして格納
@@ -326,11 +333,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 println(keido)
                 ido = longitude.replace(".", "").toInt()
 
-//                //相手の現在地をピンで表示
-//                val mid = GeoPoint(keido, ido)
-//                val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
-//                map()
-//                Map.getOverlays().add(pinOverlay)
 
 //                if(arjudge==false){
 //                    //地図移動
@@ -338,59 +340,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 //                }
                 mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("friend").child(user_id)
                 mLocationRef!!.addListenerForSingleValueEvent(mEvent)
-
-
-//                val popupOverlay = object : PopupOverlay() {
-//                    override fun onTap(item: OverlayItem?) {
-//                        //ポップアップをタッチした際の処理
-//                        //友達に位置情報の共有ダイアログ
-//                        AlertDialog.Builder(context as Activity).apply {
-//                            setTitle("ルート探索")
-//                            setMessage(nowfriendname + "ルートを探索しますか？")
-//                            setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
-//                                RouteFind()
-//
-////
-//                                /*
-//                                //AR表示ボタンの追加
-//                                val ArButton = Button(context)
-//                                ArButton.layoutParams =
-//                                    LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-//                                ArButton.text = "AR表示"
-//                                ArButton.setOnClickListener {
-//                                    RouteFind()
-//                                }
-//                                Map.addView(ArButton)
-//                                */
-//
-//                                Toast.makeText(context, "ルートを表示致しました！", Toast.LENGTH_LONG).show()
-//                            })
-//
-//                            setNegativeButton("Cancel", null)
-//                            show()
-//                        }
-//
-//                    }
-//                }
-//
-//                Map.getOverlays().add(popupOverlay);
-//                pinOverlay.setOnFocusChangeListener(popupOverlay);
-//                pinOverlay.addPoint(mid, nowfriendname, "東京ミッドタウンについて")
-
-//                //共有中のユーザー表示
-//                val shareUser = TextView(context)
-//                shareUser.layoutParams = LinearLayout.LayoutParams(
-//                    LinearLayout.LayoutParams.WRAP_CONTENT,
-//                    LinearLayout.LayoutParams.WRAP_CONTENT
-//                )
-//                shareUser.text = "現在地を受信中"
-//                shareUser.gravity = Gravity.TOP
-//                shareUser.setBackgroundColor(Color.GRAY)
-//                shareUser.setOnClickListener {
-//                    //地図移動
-//                    Map.mapController.animateTo(mid)
-//                }
-//                Map.addView(shareUser)
 
 
             }
@@ -433,10 +382,15 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         navUsername.text = user_name
         navUserid.text = user
 
-
+        navUserid.setOnClickListener {
+            val intent = Intent()
+            intent.action = Intent.ACTION_SEND
+            intent.type = "text/plain"
+            intent.putExtra(Intent.EXTRA_TEXT, navUserid.text.toString())
+            startActivity(intent)
+        }
 
         context = this
-
 
 
         // パーミッションの許可状態を確認する
@@ -624,8 +578,8 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             R.id.nav_map_air -> {
                 Map.setMapType(8)//地図の種類変更
             }
-            R.id.nav_rain -> {
-            }
+//            R.id.nav_rain -> {
+//            }
             R.id.nav_share -> {
             }
             R.id.nav_find -> {

@@ -8,6 +8,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/nameTextView"
             android:textAppearance="?android:attr/textAppearanceLarge"/>
+    <TextView
+            android:id="@+id/ShareData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"/>
 
     <!--Button
             android:layout_width="wrap_content"

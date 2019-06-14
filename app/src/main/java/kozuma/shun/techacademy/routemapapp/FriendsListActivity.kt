@@ -1,13 +1,20 @@
 package kozuma.shun.techacademy.routemapapp
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Color.GRAY
 import android.graphics.Color.YELLOW
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.LinearLayout
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -15,6 +22,13 @@ import jp.co.yahoo.android.maps.GeoPoint
 import jp.co.yahoo.android.maps.MapView
 import kotlinx.android.synthetic.main.activity_friends_list.*
 import jp.co.yahoo.android.maps.MyLocationOverlay
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
+
+
 
 
 
@@ -38,11 +52,45 @@ class FriendsListActivity : AppCompatActivity() {
 
     private lateinit var button: String
 
+
+    var context: Context? = null
+
     //現在地取得
     private var _overlay: MyLocationOverlay? = null
     private var keido = 0.0 //現在地　経度
     private var ido = 0.0 //現在地　緯度
     private  var p: GeoPoint = GeoPoint(0,0)//現在地の取得
+
+
+    private val mEventRecieveListener = object : ValueEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+
+        }
+
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            val map = dataSnapshot.value as Map<String, String>
+            val user_id = map["user_id"] ?: ""
+            mAdapter.friendRecieve = user_id
+        }
+
+    }
+
+    private val mEventSendListener = object : ValueEventListener{
+        override fun onCancelled(p0: DatabaseError) {
+
+        }
+
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+
+            val map = dataSnapshot.value as Map<String, String>
+
+
+            val user_id = map["user_id"] ?: ""
+            //mAdapter.friendSend = user_id
+            println("わお"+user_id)
+        }
+
+    }
 
 
     private val mEventListener = object : ChildEventListener {
@@ -52,6 +100,7 @@ class FriendsListActivity : AppCompatActivity() {
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key ?: ""
             val friend = Friends(friend_uid, name)
+
             mFriendArrayList.add(friend)
             mAdapter.notifyDataSetChanged()
 
@@ -76,6 +125,7 @@ class FriendsListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends_list)
 
+        context = this
 
         //ユーザー検索画面に遷移
         userFindButton.setOnClickListener {
@@ -107,6 +157,7 @@ class FriendsListActivity : AppCompatActivity() {
         mAdapter.notifyDataSetChanged()
 
 
+
         val intent = intent
         button = intent.getStringExtra("button")
         if (button.equals("0")) {
@@ -127,7 +178,7 @@ class FriendsListActivity : AppCompatActivity() {
                 setMessage(addname + "に現在地を共有しますか？")
                 setPositiveButton("共有",DialogInterface.OnClickListener {_, _ ->
                     location()
-
+                    mAdapter.friendSend = addid
                     Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
                 })
 
@@ -188,7 +239,7 @@ class FriendsListActivity : AppCompatActivity() {
         mbuttonId = false
         friendListButton.setBackgroundColor(YELLOW)
         permissionButton.setBackgroundColor(GRAY)
-        //mAdapter.getbuttonId(0)
+        mAdapter.getbuttonId(0)
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
@@ -196,7 +247,16 @@ class FriendsListActivity : AppCompatActivity() {
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListener)
 
+        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+        mFriendRef!!.addValueEventListener(mEventRecieveListener)
+
+//        mFriendRef = mDatabaseReference.child(UsersPATH)
+//        mFriendRef!!.addValueEventListener(mEventSendListener)
+
+
     }
+
+
 
     fun NotFriendclick() {
 
@@ -205,7 +265,7 @@ class FriendsListActivity : AppCompatActivity() {
         permissionButton.setBackgroundColor(YELLOW)
         friendListButton.setBackgroundColor(GRAY)
         //友達のリストをクリアしてから再度Adapterにセットし、AdapterをListViewにセットし直す
-        //mAdapter.getbuttonId(1)
+        mAdapter.getbuttonId(1)
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
         mListView.adapter = mAdapter
@@ -277,6 +337,7 @@ class FriendsListActivity : AppCompatActivity() {
         mAdapter = FriendsListAdapter(this)
         mFriendArrayList = ArrayList<Friends>()
         mAdapter.notifyDataSetChanged()
+
 
         finish()
         val intent = Intent(applicationContext, FriendsListActivity::class.java)
