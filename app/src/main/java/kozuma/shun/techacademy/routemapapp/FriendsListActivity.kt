@@ -52,6 +52,9 @@ class FriendsListActivity : AppCompatActivity() {
 
     private lateinit var button: String
 
+    var friendsid: String? = null
+    var friend_uid: String? = null
+
 
     var context: Context? = null
 
@@ -61,6 +64,7 @@ class FriendsListActivity : AppCompatActivity() {
     private var ido = 0.0 //現在地　緯度
     private  var p: GeoPoint = GeoPoint(0,0)//現在地の取得
 
+    lateinit var intentis:Intent
 
     private val mEventRecieveListener = object : ValueEventListener{
         override fun onCancelled(p0: DatabaseError) {
@@ -76,18 +80,27 @@ class FriendsListActivity : AppCompatActivity() {
     }
 
     private val mEventSendListener = object : ValueEventListener{
+
+
         override fun onCancelled(p0: DatabaseError) {
 
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
 
-            val map = dataSnapshot.value as Map<String, String>
+            val text = intentis.getStringExtra("TEXT_KEY")
+            println("わお"+ text)
+
+            if(dataSnapshot.value != null){
+                val map = dataSnapshot.value as Map<String, String>
+                val user_id = map["user_id"] ?: ""
+                val frid = dataSnapshot.key
+                //val intents = intent.getStringExtra("friend")
 
 
-            val user_id = map["user_id"] ?: ""
-            //mAdapter.friendSend = user_id
-            println("わお"+user_id)
+
+            }
+
         }
 
     }
@@ -101,8 +114,20 @@ class FriendsListActivity : AppCompatActivity() {
             val friend_uid = dataSnapshot.key ?: ""
             val friend = Friends(friend_uid, name)
 
+            //val intent = Intent(applicationContext, FriendsListActivity::class.java)
+            //intent.putExtra("friend", friend_uid)
+
+
+
+            mFriendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
+            mFriendRef!!.addValueEventListener(mEventSendListener)
+
             mFriendArrayList.add(friend)
+            println("お"+ friend_uid)
+            intentis.putExtra("TEXT_KEY",friend_uid)
             mAdapter.notifyDataSetChanged()
+
+
 
         }
 
@@ -167,6 +192,7 @@ class FriendsListActivity : AppCompatActivity() {
             NotFriendclick()
         }
 
+        intentis = Intent(this, FriendsListActivity::class.java)
 
         mListView.setOnItemClickListener { parent, view, position, id ->
             addid = mFriendArrayList[position].friend_uid
