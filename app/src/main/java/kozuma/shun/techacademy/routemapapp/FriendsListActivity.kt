@@ -3,33 +3,19 @@ package kozuma.shun.techacademy.routemapapp
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Color.GRAY
 import android.graphics.Color.YELLOW
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.LinearLayout
+import android.support.v7.app.AppCompatActivity
 import android.widget.ListView
-import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.co.yahoo.android.maps.GeoPoint
 import jp.co.yahoo.android.maps.MapView
-import kotlinx.android.synthetic.main.activity_friends_list.*
 import jp.co.yahoo.android.maps.MyLocationOverlay
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.DatabaseReference
-
-
-
+import kotlinx.android.synthetic.main.activity_friends_list.*
 
 
 class FriendsListActivity : AppCompatActivity() {
@@ -43,6 +29,7 @@ class FriendsListActivity : AppCompatActivity() {
     val user = FirebaseAuth.getInstance().currentUser!!.uid
 
     private var mFriendRef: DatabaseReference? = null
+    private var mFriendSendRef: DatabaseReference? = null
 
     //addボタン選択ユーザのIDとPassを所得
     private lateinit var addname: String
@@ -52,8 +39,9 @@ class FriendsListActivity : AppCompatActivity() {
 
     private lateinit var button: String
 
-    var friendsid: String? = null
-    var friend_uid: String? = null
+    var text = mutableListOf<String>()
+
+    var count = -1
 
 
     var context: Context? = null
@@ -72,39 +60,101 @@ class FriendsListActivity : AppCompatActivity() {
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            val map = dataSnapshot.value as Map<String, String>
-            val user_id = map["user_id"] ?: ""
-            mAdapter.friendRecieve = user_id
-        }
-
-    }
-
-    private val mEventSendListener = object : ValueEventListener{
-
-
-        override fun onCancelled(p0: DatabaseError) {
-
-        }
-
-        override fun onDataChange(dataSnapshot: DataSnapshot) {
-
-            val text = intentis.getStringExtra("TEXT_KEY")
-            println("わお"+ text)
-
+            //count++
             if(dataSnapshot.value != null){
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = map["user_id"] ?: ""
-                val frid = dataSnapshot.key
-                //val intents = intent.getStringExtra("friend")
-
-
-
+                mAdapter.friendRecieve = user_id
+                //mAdapter.notifyDataSetChanged()
             }
 
         }
 
     }
 
+    private val mEventSendListener = object : ValueEventListener {
+        override fun onCancelled(p0: DatabaseError) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            println("count"+count)
+            count++
+            println("配列の行数" + (mFriendArrayList.size - 1))
+            if (dataSnapshot.value != null && count <= mFriendArrayList.size - 1) {
+                val map = dataSnapshot.value as Map<String, String>
+                val user_id = map["user_id"] ?: ""
+                val latitude = map["latitude"] ?: ""
+                val longitude = map["longitude"] ?: ""
+
+
+                println(latitude)
+                println(longitude)
+                println(user_id)
+
+
+                if (user_id.equals(user)) {
+                    println("Listの" + count)
+                    println("送信中の" + text[count])
+                    mAdapter.friendPosition = count
+                    mAdapter.friendSend = text[count]
+                    //mAdapter.sendUserId(true,count,text[count])
+                    mAdapter.notifyDataSetChanged()
+
+                }
+            }
+        }
+
+    }
+    /*
+    private val mEventSendListener = object : ChildEventListener {
+        override fun onChildMoved(dataSnapshot: DataSnapshot, p1: String?) {
+            println("count"+count)
+            count++
+            println("配列の行数" + (mFriendArrayList.size - 1))
+            if (dataSnapshot.value != null && count <= mFriendArrayList.size - 1) {
+                val map = dataSnapshot.value as Map<String, String>
+                val user_id = map["user_id"] ?: ""
+                val latitude = map["latitude"] ?: ""
+                val longitude = map["longitude"] ?: ""
+
+
+                println(latitude)
+                println(longitude)
+                println(user_id)
+
+
+                if (user_id.equals(user)) {
+                    println("Listの" + count)
+                    println("送信中の" + text[count])
+//                    mAdapter.friendPosition = count
+//                    mAdapter.friendSend = text[count]
+                    mAdapter.sendUserId(true,count,text[count])
+                    mAdapter.notifyDataSetChanged()
+
+                }
+            }
+        }
+
+        override fun onChildChanged(dataSnapshot: DataSnapshot, p1: String?) {
+
+        }
+
+        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
+
+        }
+
+        override fun onChildRemoved(p0: DataSnapshot) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onCancelled(p0: DatabaseError) {
+
+        }
+
+
+    }
+*/
 
     private val mEventListener = object : ChildEventListener {
 
@@ -114,18 +164,13 @@ class FriendsListActivity : AppCompatActivity() {
             val friend_uid = dataSnapshot.key ?: ""
             val friend = Friends(friend_uid, name)
 
-            //val intent = Intent(applicationContext, FriendsListActivity::class.java)
-            //intent.putExtra("friend", friend_uid)
-
-
-
-            mFriendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
-            mFriendRef!!.addValueEventListener(mEventSendListener)
-
+            text.add(friend_uid)
             mFriendArrayList.add(friend)
-            println("お"+ friend_uid)
-            intentis.putExtra("TEXT_KEY",friend_uid)
-            mAdapter.notifyDataSetChanged()
+
+            mFriendSendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
+            mFriendSendRef!!.addListenerForSingleValueEvent(mEventSendListener)
+
+            //mAdapter.notifyDataSetChanged()
 
 
 
@@ -171,7 +216,6 @@ class FriendsListActivity : AppCompatActivity() {
         //tab_layouts.setupWithViewPager(pagers)
 
 
-
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
@@ -179,8 +223,7 @@ class FriendsListActivity : AppCompatActivity() {
         mListView = this.findViewById(R.id.listView1)
         mAdapter = FriendsListAdapter(this)
         mFriendArrayList = ArrayList<Friends>()
-        mAdapter.notifyDataSetChanged()
-
+        //mAdapter.notifyDataSetChanged()
 
 
         val intent = intent
@@ -202,9 +245,11 @@ class FriendsListActivity : AppCompatActivity() {
             AlertDialog.Builder(this).apply {
                 setTitle("現在地共有")
                 setMessage(addname + "に現在地を共有しますか？")
-                setPositiveButton("共有",DialogInterface.OnClickListener {_, _ ->
+                setPositiveButton("共有", DialogInterface.OnClickListener { _, _ ->
                     location()
-                    mAdapter.friendSend = addid
+//                    mAdapter.friendSend = addid
+//                    mAdapter.friendPosition = position
+//                    mAdapter.notifyDataSetChanged()
                     Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
                 })
 
@@ -261,7 +306,7 @@ class FriendsListActivity : AppCompatActivity() {
 
     fun FriendListclick() {
         //友達リスト
-
+        count = -1
         mbuttonId = false
         friendListButton.setBackgroundColor(YELLOW)
         permissionButton.setBackgroundColor(GRAY)
@@ -285,7 +330,7 @@ class FriendsListActivity : AppCompatActivity() {
 
 
     fun NotFriendclick() {
-
+        count = -1
         //友達かもりすと
         mbuttonId = true
         permissionButton.setBackgroundColor(YELLOW)
@@ -327,7 +372,7 @@ class FriendsListActivity : AppCompatActivity() {
         mListView = this.findViewById(R.id.listView1)
         mAdapter = FriendsListAdapter(this)
         mFriendArrayList = ArrayList<Friends>()
-        mAdapter.notifyDataSetChanged()
+        //mAdapter.notifyDataSetChanged()
 
         finish()
         val intent = Intent(applicationContext, FriendsListActivity::class.java)
@@ -362,7 +407,7 @@ class FriendsListActivity : AppCompatActivity() {
         mListView = this.findViewById(R.id.listView1)
         mAdapter = FriendsListAdapter(this)
         mFriendArrayList = ArrayList<Friends>()
-        mAdapter.notifyDataSetChanged()
+        //mAdapter.notifyDataSetChanged()
 
 
         finish()
@@ -420,5 +465,6 @@ class FriendsListActivity : AppCompatActivity() {
         mapView.getOverlays().add(_overlay)
 
     }
+
 }
 

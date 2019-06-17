@@ -1,7 +1,6 @@
 package kozuma.shun.techacademy.routemapapp
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -12,39 +11,25 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
-import android.support.design.widget.Snackbar
-import android.support.v4.app.Fragment
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
-import android.text.Layout
-import android.util.Log
 import android.view.*
 import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import jp.co.yahoo.android.maps.MapActivity
-import jp.co.yahoo.android.maps.MapView
-import jp.co.yahoo.android.maps.MyLocationOverlay
-import kotlinx.android.synthetic.main.activity_main.*
-import jp.co.yahoo.android.maps.GeoPoint
-import jp.co.yahoo.android.maps.PinOverlay
-import jp.co.yahoo.android.maps.OverlayItem
-import jp.co.yahoo.android.maps.PopupOverlay
+import jp.co.yahoo.android.maps.*
 import jp.co.yahoo.android.maps.ar.ARController
 import jp.co.yahoo.android.maps.ar.ARControllerListener
 import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
 import jp.co.yahoo.android.maps.weather.WeatherOverlay
-import kotlinx.android.synthetic.main.nav_header_main.*
-import org.w3c.dom.Text
 
 
 class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
@@ -238,31 +223,33 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            val map = dataSnapshot.value as Map<String, String>
-            val user_id = dataSnapshot.key
-            nowfriendname = map["name"] ?: ""
+            if(dataSnapshot.value != null) {
 
-            navUsername.text = user_name
+                val map = dataSnapshot.value as Map<String, String>
+                val user_id = dataSnapshot.key
+                nowfriendname = map["name"] ?: ""
+
+                navUsername.text = user_name
 
 
-            //相手の現在地をピンで表示
-            val mid = GeoPoint(keido, ido)
-            val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
-            map()
-            Map.getOverlays().add(pinOverlay)
+                //相手の現在地をピンで表示
+                val mid = GeoPoint(keido, ido)
+                val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
+                map()
+                Map.getOverlays().add(pinOverlay)
 
-            val popupOverlay = object : PopupOverlay() {
-                override fun onTap(item: OverlayItem?) {
-                    //ポップアップをタッチした際の処理
-                    //友達に位置情報の共有ダイアログ
-                    AlertDialog.Builder(context as Activity).apply {
-                        setTitle("ルート探索")
-                        setMessage(nowfriendname + "ルートを探索しますか？")
-                        setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
-                            RouteFind()
+                val popupOverlay = object : PopupOverlay() {
+                    override fun onTap(item: OverlayItem?) {
+                        //ポップアップをタッチした際の処理
+                        //友達に位置情報の共有ダイアログ
+                        AlertDialog.Builder(context as Activity).apply {
+                            setTitle("ルート探索")
+                            setMessage(nowfriendname + "ルートを探索しますか？")
+                            setPositiveButton("探索", DialogInterface.OnClickListener { _, _ ->
+                                RouteFind()
 
 //
-                            /*
+                                /*
                             //AR表示ボタンの追加
                             val ArButton = Button(context)
                             ArButton.layoutParams =
@@ -274,36 +261,36 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                             Map.addView(ArButton)
                             */
 
-                            Toast.makeText(context, "ルートを表示致しました！", Toast.LENGTH_LONG).show()
-                        })
+                                Toast.makeText(context, "ルートを表示致しました！", Toast.LENGTH_LONG).show()
+                            })
 
-                        setNegativeButton("Cancel", null)
-                        show()
+                            setNegativeButton("Cancel", null)
+                            show()
+                        }
+
                     }
-
                 }
+
+                Map.getOverlays().add(popupOverlay)
+                pinOverlay.setOnFocusChangeListener(popupOverlay)
+                pinOverlay.addPoint(mid, nowfriendname, "なし")
+
+                //共有中のユーザー表示
+                val shareUser = TextView(context)
+                shareUser.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                shareUser.text = "現在地を受信中"
+                shareUser.gravity = Gravity.TOP
+                shareUser.setBackgroundColor(Color.GRAY)
+                shareUser.setOnClickListener {
+                    //地図移動
+                    Map.mapController.animateTo(mid)
+                }
+
+                Map.addView(shareUser)
             }
-
-            Map.getOverlays().add(popupOverlay)
-            pinOverlay.setOnFocusChangeListener(popupOverlay)
-            pinOverlay.addPoint(mid, nowfriendname, "なし")
-
-            //共有中のユーザー表示
-            val shareUser = TextView(context)
-            shareUser.layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            shareUser.text = "現在地を受信中"
-            shareUser.gravity = Gravity.TOP
-            shareUser.setBackgroundColor(Color.GRAY)
-            shareUser.setOnClickListener {
-                //地図移動
-                Map.mapController.animateTo(mid)
-            }
-
-            Map.addView(shareUser)
-
 
         }
 

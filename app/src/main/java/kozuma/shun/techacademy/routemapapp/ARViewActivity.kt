@@ -25,7 +25,6 @@ import jp.co.yahoo.android.maps.ar.ARController
 import jp.co.yahoo.android.maps.ar.ARControllerListener
 import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
-import kotlinx.android.synthetic.main.activity_friend.*
 
 class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
     ARControllerListener {

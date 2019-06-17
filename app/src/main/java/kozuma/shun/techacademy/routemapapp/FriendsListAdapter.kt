@@ -1,18 +1,12 @@
 package kozuma.shun.techacademy.routemapapp
 
 import android.content.Context
-
-import android.content.DialogInterface
-import android.support.v4.content.ContextCompat.startActivity
-import android.support.v7.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.BaseAdapter
+import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import kotlinx.android.synthetic.main.activity_friends_list.*
-import android.content.Intent
 
 
 class FriendsListAdapter(context: Context) : BaseAdapter() {
@@ -26,6 +20,11 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
     var friendRecieve: String? = null
     var friendSend: String? = null
 
+    var friendPosition: Int? = null
+
+    var juju: Boolean = false
+
+
     init {
         mLayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     }
@@ -35,8 +34,16 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
         buttonId = id
     }
 
-    fun receiveUserId(receiveId: String){
-        friendRecieve = receiveId
+//    fun receiveUserId(receiveId: String){
+//        friendRecieve = receiveId
+//    }
+
+    fun sendUserId(ju: Boolean, count: Int, sendId: String) {
+        println("受け取った" + ju + count + ": " + sendId)
+        juju = ju
+        friendPosition = count
+        friendSend = sendId
+
     }
 
     override fun getCount(): Int {
@@ -53,6 +60,8 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+
+        println("getViewだぜ！！")
         var convertView = convertView
 
 
@@ -61,18 +70,30 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
                 convertView = mLayoutInflater.inflate(R.layout.list_friends, parent, false)
             }
 
+
             val nameText = convertView!!.findViewById<View>(R.id.nameTextView) as TextView
             nameText.text = mFriendArrayList[position].name
 
             val shareText = convertView!!.findViewById<View>(R.id.ShareData) as TextView
 
-            println(""+friendSend+"=="+mFriendArrayList[position].friend_uid)
-            if(friendRecieve == mFriendArrayList[position].friend_uid){
-                shareText.text = "現在地受信中"
-            }else if(friendSend == mFriendArrayList[position].friend_uid){
-                shareText.text = "現在地送信中"
-            }
 
+//            if(friendRecieve == mFriendArrayList[position].friend_uid){
+//                shareText.text = "現在地受信中"
+//            }
+
+
+            println("getView   " + friendPosition)
+
+            if (position == friendPosition) {
+
+                if (friendSend == mFriendArrayList[position].friend_uid) {
+                    shareText.text = "現在地送信中"
+                    println("getView   " + friendPosition)
+                    println("Send  " + friendSend + "==" + mFriendArrayList[position].friend_uid)
+                }
+            } else {
+                println("notView   " + friendPosition)
+            }
 
         } else {
             if (convertView == null) {
