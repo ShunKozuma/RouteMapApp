@@ -2,9 +2,9 @@ package kozuma.shun.techacademy.routemapapp
 
 import android.content.Intent
 import android.graphics.Color
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
 import android.widget.ListView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
@@ -35,7 +35,7 @@ class FriendsPermissionActivity : AppCompatActivity() {
             val map = dataSnapshot.value as Map<String, String>
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key.toString()
-            val friend = Friends(friend_uid ,name)
+            val friend = Friends(friend_uid ,name,false)
             mFriendArrayList.add(friend)
             mAdapter.notifyDataSetChanged()
 

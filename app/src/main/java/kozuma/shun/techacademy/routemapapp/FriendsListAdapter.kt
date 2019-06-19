@@ -1,6 +1,7 @@
 package kozuma.shun.techacademy.routemapapp
 
 import android.content.Context
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,9 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
     var juju: Boolean = false
 
+    var kaposi: Int? = null
+    private var mHandler = Handler()
+
 
     init {
         mLayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -39,12 +43,13 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 //    }
 
     fun sendUserId(ju: Boolean, count: Int, sendId: String) {
-        println("受け取った" + ju + count + ": " + sendId)
+        println("受け取った$ju$count: $sendId")
         juju = ju
         friendPosition = count
         friendSend = sendId
 
     }
+
 
     override fun getCount(): Int {
         return mFriendArrayList.size
@@ -61,7 +66,8 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
 
-        println("getViewだぜ！！")
+
+        //println("getViewだぜ！！")
         var convertView = convertView
 
 
@@ -76,23 +82,16 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
             val shareText = convertView!!.findViewById<View>(R.id.ShareData) as TextView
 
+            val sText = convertView!!.findViewById<View>(R.id.SData) as TextView
 
-//            if(friendRecieve == mFriendArrayList[position].friend_uid){
-//                shareText.text = "現在地受信中"
-//            }
+            println("どっち" + mFriendArrayList[position].sendBoolean)
 
-
-            println("getView   " + friendPosition)
-
-            if (position == friendPosition) {
-
-                if (friendSend == mFriendArrayList[position].friend_uid) {
-                    shareText.text = "現在地送信中"
-                    println("getView   " + friendPosition)
-                    println("Send  " + friendSend + "==" + mFriendArrayList[position].friend_uid)
-                }
-            } else {
-                println("notView   " + friendPosition)
+            if(friendRecieve == mFriendArrayList[position].friend_uid && mFriendArrayList[position].sendBoolean == true){
+                shareText.text = "現在地送受信中"
+            }else if (mFriendArrayList[position].sendBoolean == true) {
+                shareText.text = "現在地送信中"
+            }else if (friendRecieve == mFriendArrayList[position].friend_uid) {
+                shareText.text = "現在地受信中"
             }
 
         } else {

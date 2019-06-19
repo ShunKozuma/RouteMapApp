@@ -29,6 +29,9 @@
             android:layout_marginRight="60dp"
             android:layout_marginLeft="60dp"
     >
+        <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
         <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -36,6 +39,11 @@
                 android:ems="10"
                 android:id="@+id/idText"
                 android:hint="ID"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
         <EditText
                 android:layout_width="match_parent"
@@ -44,6 +52,8 @@
                 android:ems="10"
                 android:id="@+id/passText"
                 android:hint="Pass"/>
+
+        </android.support.design.widget.TextInputLayout>
         <Button
                 android:text="ログイン"
                 android:layout_width="match_parent"

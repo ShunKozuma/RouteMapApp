@@ -523,7 +523,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         //友達リストボタンの追加
         val fab = FloatingActionButton(this)
         fab.setOnClickListener {
-            val intent = Intent(applicationContext, FriendsListActivity::class.java)
+            val intent = Intent(applicationContext, ListFriendActivity::class.java)
             intent.putExtra("button", "0")
             startActivity(intent)
         }
@@ -553,7 +553,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     }
 
 
-
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
         val id = item.itemId
@@ -565,9 +564,9 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             R.id.nav_map_air -> {
                 Map.setMapType(8)//地図の種類変更
             }
-//            R.id.nav_rain -> {
-//            }
             R.id.nav_share -> {
+                val intent = Intent(applicationContext, ListFriendActivity::class.java)
+                startActivity(intent)
             }
             R.id.nav_find -> {
                 val intent = Intent(applicationContext, UserFindActivity::class.java)

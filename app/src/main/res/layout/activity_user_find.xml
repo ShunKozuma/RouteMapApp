@@ -16,22 +16,25 @@
             android:layout_marginLeft="30dp"
     >
 
+        <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/FindEditText"
+                    android:hint="ユーザーID"
+                    android:text=""
+                    android:layout_weight="0.6"/>
+        </android.support.design.widget.TextInputLayout>
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/FindEditText"
-            android:hint="ユーザーID"
-            android:text=""
-            android:layout_weight="0.6"/>
-
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/FindButton"
-            android:text="検索"
-            android:layout_weight="0.4"
-            tools:ignore="MissingConstraints"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/FindButton"
+                android:text="検索"
+                android:layout_weight="0.4"
+                tools:ignore="MissingConstraints"/>
 
     </LinearLayout>
 
@@ -40,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/CenterButton"
-            android:gravity="center" >
+            android:gravity="center">
         <TextView
                 android:layout_marginTop="130dp"
                 android:text=""

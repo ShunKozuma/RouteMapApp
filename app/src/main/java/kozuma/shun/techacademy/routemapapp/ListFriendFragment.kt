@@ -3,6 +3,7 @@ package kozuma.shun.techacademy.routemapapp
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
@@ -31,6 +32,8 @@ class ListFriendFragment : Fragment() {
     val user = FirebaseAuth.getInstance().currentUser!!.uid
 
     private var mFriendRef: DatabaseReference? = null
+    private var mFriendRecieveRef: DatabaseReference? = null
+    private var mFriendSendRef: DatabaseReference? = null
 
     //addボタン選択ユーザのIDとPassを所得
     private lateinit var addname: String
@@ -45,11 +48,15 @@ class ListFriendFragment : Fragment() {
     private var _overlay: MyLocationOverlay? = null
     private var keido = 0.0 //現在地　経度
     private var ido = 0.0 //現在地　緯度
-    private  var p: GeoPoint = GeoPoint(0,0)//現在地の取得
+    private var p: GeoPoint = GeoPoint(0, 0)//現在地の取得
 
     var text = mutableListOf<String>()
 
     var count = -1
+
+    lateinit var friend: Friends
+
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(kozuma.shun.techacademy.routemapapp.R.layout.list_friend_fragment, container, false)
@@ -62,7 +69,7 @@ class ListFriendFragment : Fragment() {
 
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_friends_list)
-        println("Createした"+count)
+        println("Createした" + count)
 
         mapView = MapView(context as Activity?, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
 
@@ -75,7 +82,7 @@ class ListFriendFragment : Fragment() {
         mListView = mListViews
         mAdapter = FriendsListAdapter(thisis!!)
         mFriendArrayList = ArrayList<Friends>()
-        mAdapter.notifyDataSetChanged()
+        //mAdapter.notifyDataSetChanged()
 
         FriendListclick()
 
@@ -83,30 +90,41 @@ class ListFriendFragment : Fragment() {
             addid = mFriendArrayList[position].friend_uid
             addname = mFriendArrayList[position].name
 
-            //友達に位置情報の共有ダイアログ
-            AlertDialog.Builder(thisis!!).apply {
-                setTitle("現在地共有")
-                setMessage(addname + "に現在地を共有しますか？")
-                setPositiveButton("共有", DialogInterface.OnClickListener { _, _ ->
-                    location()
-                    mAdapter.friendSend = addid
-                    mAdapter.notifyDataSetChanged()
-                    Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
-                })
-
-                setNegativeButton("Cancel", null)
-                show()
-            }
+            // アラートダイアログ
+            alertCheck(addid, addname)
 
         }
 
-        //ListViewを長押ししたときの処理
-        mListView.setOnItemLongClickListener { parent, _, position, _ ->
-            //選択ユーザのIDとPassを所得
-            addid = mFriendArrayList[position].friend_uid
-            addname = mFriendArrayList[position].name
+        mListView.choiceMode = ListView.CHOICE_MODE_NONE
 
 
+
+    }
+
+    private fun alertCheck(getid: String, getname: String) {
+        val alert_menu = arrayOf("現在地送信", "友達取消", "キャンセル")
+
+        val alert = AlertDialog.Builder(thisis!!)
+        alert.setTitle("")
+        alert.setItems(alert_menu) { dialog, idx ->
+            // リストアイテムを選択したときの処理
+            // 上に移動
+            if (idx == 0) {
+                AlertDialog.Builder(thisis!!).apply {
+                    setTitle("現在地送信")
+                    setMessage(addname + "に現在地を送信しますか？")
+                    setPositiveButton("送信", DialogInterface.OnClickListener { _, _ ->
+                        location()
+                        activity!!.finish()
+                        val intent = Intent(activity, ListFriendActivity::class.java)
+                        startActivity(intent)
+                        Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
+                    })
+                    setNegativeButton("Cancel", null)
+                    show()
+                }
+
+            } else if (idx == 1) {
                 // 友達取り消しダイアログを作成して表示
                 AlertDialog.Builder(thisis!!).apply {
                     setTitle("友達取り消し")
@@ -114,14 +132,22 @@ class ListFriendFragment : Fragment() {
                     setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
                         // OKをタップしたときの処理
                         NotFriendDialog()
+                        activity!!.finish()
+                        val intent = Intent(activity, ListFriendActivity::class.java)
+                        //intent.putExtra("TAB_DATA", "2")
+                        startActivity(intent)
+                        //mAdapter.notifyDataSetChanged()
                         Toast.makeText(context, "友達を取り消しました！", Toast.LENGTH_LONG).show()
                     })
                     setNegativeButton("Cancel", null)
                     show()
                 }
 
-                true
+            } else {
+
+            }
         }
+        alert.show()
     }
 
 
@@ -131,12 +157,15 @@ class ListFriendFragment : Fragment() {
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if(dataSnapshot.value != null){
+            if (dataSnapshot.value != null) {
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = map["user_id"] ?: ""
                 mAdapter.friendRecieve = user_id
             }
-            //mAdapter.notifyDataSetChanged()
+
+            mAdapter.notifyDataSetChanged()
+
+
         }
 
     }
@@ -150,18 +179,25 @@ class ListFriendFragment : Fragment() {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
 
             count++
-            println("配列の行数" + (mFriendArrayList.size-1))
-            if(dataSnapshot.value != null && count <= mFriendArrayList.size-1){
+//            println("配列の行数" + (mFriendArrayList.size - 1))
+//                    && count <= mFriendArrayList.size - 1
+            if (dataSnapshot.value != null ) {
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = map["user_id"] ?: ""
-                if(user_id.equals(user)){
-                    println("Listの"+count)
-                    println("送信中の"+text[count])
-                    mAdapter.friendSend = text[count]
-                    //mAdapter.sendUserId(text[count])
-                    //mAdapter.notifyDataSetChanged()
+
+                if (user_id.equals(user)) {
+                    mFriendArrayList[count].sendBoolean = true
+                    println("友達：${mFriendArrayList[count].name}${mFriendArrayList[count].sendBoolean}")
+                    mAdapter.notifyDataSetChanged()
+
                 }
             }
+
+            mFriendRecieveRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+            mFriendRecieveRef!!.addValueEventListener(mEventRecieveListener)
+
+            //mAdapter.notifyDataSetChanged()
+
         }
 
     }
@@ -170,24 +206,19 @@ class ListFriendFragment : Fragment() {
     private val mEventListener = object : ChildEventListener {
 
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-            if(dataSnapshot.value == null){
-                mFriendArrayList.clear()
-            }
 
             val map = dataSnapshot.value as Map<String, String>
-               val name = map["name"] ?: ""
-               val friend_uid = dataSnapshot.key ?: ""
-               val friend = Friends(friend_uid, name)
-               text.add(friend_uid)
+            val name = map["name"] ?: ""
+            val friend_uid = dataSnapshot.key ?: ""
+            val friend = Friends(friend_uid, name, null)
+            text.add(friend_uid)
 
-               mFriendArrayList.add(friend)
+            mFriendArrayList.add(friend)
 
+            mAdapter.notifyDataSetChanged()
 
-               mFriendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
-               mFriendRef!!.addValueEventListener(mEventSendListener)
-
-               mAdapter.notifyDataSetChanged()
-
+            mFriendSendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
+            mFriendSendRef!!.addValueEventListener(mEventSendListener)
 
         }
 
@@ -207,11 +238,12 @@ class ListFriendFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        println("Resumeした"+count)
+        mAdapter.notifyDataSetChanged()
     }
+
     override fun onDestroy() {
         super.onDestroy()
-        println("Destroyした"+count)
+        println("Destroyした" + count)
     }
 
     override fun onPause() {
@@ -229,13 +261,13 @@ class ListFriendFragment : Fragment() {
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
         mListView.adapter = mAdapter
-        //mAdapter.notifyDataSetChanged()
+        mAdapter.notifyDataSetChanged()
+
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListener)
 
-        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-        mFriendRef!!.addValueEventListener(mEventRecieveListener)
-
+//        mFriendRecieveRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+//        mFriendRecieveRef!!.addValueEventListener(mEventRecieveListener)
 
 
     }
@@ -263,26 +295,9 @@ class ListFriendFragment : Fragment() {
         data["name"] = addname
         deladdRef.setValue(data)
 
-        //ListViewの準備
-//        mListView = mListViews
-//        mAdapter = FriendsListAdapter(thisis!!)
-//        mFriendArrayList = ArrayList<Friends>()
-//        mAdapter.notifyDataSetChanged()
-
-        mFriendArrayList.clear()
-        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
-        mFriendRef!!.addChildEventListener(mEventListener)
-
-//        finish()
-//        val intent = Intent(applicationContext, FriendsListActivity::class.java)
-//        intent.putExtra("button", "0")
-//        startActivity(intent)
-
-
-
     }
 
-    fun location(){
+    fun location() {
 
 
         //MyLocationOverlayインスタンス作成
@@ -318,3 +333,4 @@ class ListFriendFragment : Fragment() {
 
     }
 }
+

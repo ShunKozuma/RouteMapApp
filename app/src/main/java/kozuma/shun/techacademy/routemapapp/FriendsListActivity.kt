@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color.GRAY
 import android.graphics.Color.YELLOW
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.widget.ListView
@@ -50,24 +51,25 @@ class FriendsListActivity : AppCompatActivity() {
     private var _overlay: MyLocationOverlay? = null
     private var keido = 0.0 //現在地　経度
     private var ido = 0.0 //現在地　緯度
-    private  var p: GeoPoint = GeoPoint(0,0)//現在地の取得
+    private var p: GeoPoint = GeoPoint(0, 0)//現在地の取得
 
-    lateinit var intentis:Intent
+    lateinit var intentis: Intent
 
-    private val mEventRecieveListener = object : ValueEventListener{
+    private var mHandler = Handler()
+
+    private val mEventRecieveListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
 
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             //count++
-            if(dataSnapshot.value != null){
+            if (dataSnapshot.value != null) {
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = map["user_id"] ?: ""
                 mAdapter.friendRecieve = user_id
-                //mAdapter.notifyDataSetChanged()
             }
-
+            mAdapter.notifyDataSetChanged()
         }
 
     }
@@ -78,7 +80,7 @@ class FriendsListActivity : AppCompatActivity() {
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            println("count"+count)
+            println("count" + count)
             count++
             println("配列の行数" + (mFriendArrayList.size - 1))
             if (dataSnapshot.value != null && count <= mFriendArrayList.size - 1) {
@@ -87,22 +89,25 @@ class FriendsListActivity : AppCompatActivity() {
                 val latitude = map["latitude"] ?: ""
                 val longitude = map["longitude"] ?: ""
 
-
                 println(latitude)
                 println(longitude)
                 println(user_id)
 
-
                 if (user_id.equals(user)) {
                     println("Listの" + count)
                     println("送信中の" + text[count])
-                    mAdapter.friendPosition = count
-                    mAdapter.friendSend = text[count]
-                    //mAdapter.sendUserId(true,count,text[count])
-                    mAdapter.notifyDataSetChanged()
+                    //mAdapter.friendPosition = count
+                    //mAdapter.friendSend = text[count]
+                    mAdapter.sendUserId(true, count, text[count])
 
                 }
             }
+
+            mAdapter.notifyDataSetChanged()
+
+            //mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+            //mFriendRef!!.addValueEventListener(mEventRecieveListener)
+
         }
 
     }
@@ -162,7 +167,7 @@ class FriendsListActivity : AppCompatActivity() {
             val map = dataSnapshot.value as Map<String, String>
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key ?: ""
-            val friend = Friends(friend_uid, name)
+            val friend = Friends(friend_uid, name,false)
 
             text.add(friend_uid)
             mFriendArrayList.add(friend)
@@ -170,9 +175,7 @@ class FriendsListActivity : AppCompatActivity() {
             mFriendSendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
             mFriendSendRef!!.addListenerForSingleValueEvent(mEventSendListener)
 
-            //mAdapter.notifyDataSetChanged()
-
-
+            mAdapter.notifyDataSetChanged()
 
         }
 
@@ -241,31 +244,8 @@ class FriendsListActivity : AppCompatActivity() {
             addid = mFriendArrayList[position].friend_uid
             addname = mFriendArrayList[position].name
 
-            //友達に位置情報の共有ダイアログ
-            AlertDialog.Builder(this).apply {
-                setTitle("現在地共有")
-                setMessage(addname + "に現在地を共有しますか？")
-                setPositiveButton("共有", DialogInterface.OnClickListener { _, _ ->
-                    location()
-//                    mAdapter.friendSend = addid
-//                    mAdapter.friendPosition = position
-//                    mAdapter.notifyDataSetChanged()
-                    Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
-                })
-
-                setNegativeButton("Cancel", null)
-                show()
-            }
-
-        }
-
-        //ListViewを長押ししたときの処理
-        mListView.setOnItemLongClickListener { parent, _, position, _ ->
-            //選択ユーザのIDとPassを所得
-            addid = mFriendArrayList[position].friend_uid
-            addname = mFriendArrayList[position].name
-
             if (mbuttonId == true) {
+
 
                 // 友達許可ダイアログを作成して表示
                 AlertDialog.Builder(this).apply {
@@ -280,9 +260,60 @@ class FriendsListActivity : AppCompatActivity() {
                     show()
                 }
 
+
                 true
 
             } else {
+                // アラートダイアログ
+                alertCheck(addid, addname)
+            }
+            /*
+            //友達に位置情報の共有ダイアログ
+            AlertDialog.Builder(this).apply {
+                setTitle("現在地共有")
+                setMessage(addname + "に現在地を共有しますか？")
+                setPositiveButton("共有", DialogInterface.OnClickListener { _, _ ->
+                    location()
+//                    mAdapter.friendSend = addid
+//                    mAdapter.friendPosition = position
+//                    mAdapter.notifyDataSetChanged()
+                    Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
+                })
+
+                setNegativeButton("Cancel", null)
+                show()
+            }*/
+
+        }
+
+        /*
+        //ListViewを長押ししたときの処理
+        mListView.setOnItemLongClickListener { parent, _, position, _ ->
+            //選択ユーザのIDとPassを所得
+            addid = mFriendArrayList[position].friend_uid
+            addname = mFriendArrayList[position].name
+
+            if (mbuttonId == true) {
+
+
+                // 友達許可ダイアログを作成して表示
+                AlertDialog.Builder(this).apply {
+                    setTitle("友達申請")
+                    setMessage(addname + "の\n友達申請を許可しますか？")
+                    setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                        // OKをタップしたときの処理
+                        FriendListDialog()
+                        Toast.makeText(context, "申請を許可しました！", Toast.LENGTH_LONG).show()
+                    })
+                    setNegativeButton("Cancel", null)
+                    show()
+                }
+
+
+                true
+
+            } else {
+
                 // 友達取り消しダイアログを作成して表示
                 AlertDialog.Builder(this).apply {
                     setTitle("友達取り消し")
@@ -297,10 +328,56 @@ class FriendsListActivity : AppCompatActivity() {
                 }
 
                 true
+
             }
 
-        }
+        }*/
 
+    }
+
+
+    private fun alertCheck(getid: String, getname: String) {
+        val alert_menu = arrayOf("現在地送信", "友達取消", "cancel")
+
+        val alert = AlertDialog.Builder(this)
+        alert.setTitle("")
+        alert.setItems(alert_menu) { dialog, idx ->
+            // リストアイテムを選択したときの処理
+            // 上に移動
+            if (idx == 0) {
+                AlertDialog.Builder(this).apply {
+                    setTitle("現在地送信")
+                    setMessage(addname + "に現在地を送信しますか？")
+                    setPositiveButton("送信", DialogInterface.OnClickListener { _, _ ->
+                        location()
+//                    mAdapter.friendSend = addid
+//                    mAdapter.friendPosition = position
+//                    mAdapter.notifyDataSetChanged()
+                        Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
+                    })
+                    setNegativeButton("Cancel", null)
+                    show()
+                }
+
+            } else if (idx == 1) {
+                // 友達取り消しダイアログを作成して表示
+                AlertDialog.Builder(this).apply {
+                    setTitle("友達取り消し")
+                    setMessage(addname + "の\n友達を取り消しますか？")
+                    setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
+                        // OKをタップしたときの処理
+                        NotFriendDialog()
+                        Toast.makeText(context, "友達を取り消しました！", Toast.LENGTH_LONG).show()
+                    })
+                    setNegativeButton("Cancel", null)
+                    show()
+                }
+
+            } else {
+
+            }
+        }
+        alert.show()
     }
 
 
@@ -318,15 +395,14 @@ class FriendsListActivity : AppCompatActivity() {
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListener)
 
-        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-        mFriendRef!!.addValueEventListener(mEventRecieveListener)
+        //mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+        //mFriendRef!!.addValueEventListener(mEventRecieveListener)
 
 //        mFriendRef = mDatabaseReference.child(UsersPATH)
 //        mFriendRef!!.addValueEventListener(mEventSendListener)
 
 
     }
-
 
 
     fun NotFriendclick() {
@@ -417,7 +493,7 @@ class FriendsListActivity : AppCompatActivity() {
 
     }
 
-    fun location(){
+    fun location() {
 
 //        val senduserRef = mDatabaseReference.child(UsersPATH).child(user).child("senduser_id")
 //

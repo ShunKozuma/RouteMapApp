@@ -3,6 +3,7 @@ package kozuma.shun.techacademy.routemapapp
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
@@ -14,6 +15,10 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import jp.co.yahoo.android.maps.MapView
+
+
+
+
 
 class ListFriendAddFragment : Fragment() {
 
@@ -68,11 +73,10 @@ class ListFriendAddFragment : Fragment() {
         mAdapter.notifyDataSetChanged()
 
 
-
         NotFriendclick()
 
         //ListViewを長押ししたときの処理
-        mListView.setOnItemLongClickListener { parent, _, position, _ ->
+        mListView.setOnItemClickListener { parent, _, position, _ ->
             //選択ユーザのIDとPassを所得
             addid = mFriendArrayList[position].friend_uid
             addname = mFriendArrayList[position].name
@@ -85,6 +89,11 @@ class ListFriendAddFragment : Fragment() {
                     setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
                         // OKをタップしたときの処理
                         FriendListDialog()
+                        activity!!.finish()
+                        val intent = Intent(activity, ListFriendActivity::class.java)
+                        intent.putExtra("TAB_DATA", "3")
+                        startActivity(intent)
+                            //mAdapter.notifyDataSetChanged()
                         Toast.makeText(context, "申請を許可しました！", Toast.LENGTH_LONG).show()
                     })
                     setNegativeButton("Cancel", null)
@@ -95,22 +104,22 @@ class ListFriendAddFragment : Fragment() {
 
 
         }
+
+
+
     }
 
     private val mEventListener = object : ChildEventListener {
 
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-            if(dataSnapshot.value == null){
-                mFriendArrayList.clear()
+            if(dataSnapshot.value != null) {
+                val map = dataSnapshot.value as Map<String, String>
+                val name = map["name"] ?: ""
+                val friend_uid = dataSnapshot.key ?: ""
+                val friend = Friends(friend_uid, name,false)
+                mFriendArrayList.add(friend)
+                mAdapter.notifyDataSetChanged()
             }
-
-            val map = dataSnapshot.value as Map<String, String>
-            val name = map["name"] ?: ""
-            val friend_uid = dataSnapshot.key ?: ""
-            val friend = Friends(friend_uid, name)
-            mFriendArrayList.add(friend)
-            mAdapter.notifyDataSetChanged()
-
 
 
         }
@@ -154,6 +163,7 @@ class ListFriendAddFragment : Fragment() {
         mFriendArrayList.clear()
         mAdapter.setFriendArrayList(mFriendArrayList)
         mListView.adapter = mAdapter
+        //mAdapter.notifyDataSetChanged()
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
         mFriendRef!!.addChildEventListener(mEventListener)
 
@@ -187,10 +197,6 @@ class ListFriendAddFragment : Fragment() {
 //        mAdapter = FriendsListAdapter(thisis!!)
 //        mFriendArrayList = ArrayList<Friends>()
 //        mAdapter.notifyDataSetChanged()
-
-        mFriendArrayList.clear()
-        mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("addfriend")
-        mFriendRef!!.addChildEventListener(mEventListener)
 
 
     }
