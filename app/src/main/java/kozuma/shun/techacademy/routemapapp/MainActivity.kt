@@ -33,7 +33,7 @@ import jp.co.yahoo.android.maps.weather.WeatherOverlay
 
 
 class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
-    ARControllerListener, WeatherOverlay.WeatherOverlayListener, NavigationView.OnNavigationItemSelectedListener  {
+    ARControllerListener, WeatherOverlay.WeatherOverlayListener, NavigationView.OnNavigationItemSelectedListener {
 
 
     private lateinit var mToolbar: Toolbar
@@ -77,21 +77,16 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     //ログインユーザーの名前
     var user_name: String? = null
-    lateinit var navUsername : TextView
+    lateinit var navUsername: TextView
 
     //共有中の友達
     //var nowfriendname: String? = null
-
-
-
 
 
     var datakeido = mutableListOf<Int>()
     var dataido = mutableListOf<Int>()
 
     var count = -1
-
-
 
 
     //WeatherOverlayのインターフェース
@@ -212,26 +207,26 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         return false
     }
 
-    private val mEventname = object : ValueEventListener{
+    private val mEventname = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
 
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            val map = dataSnapshot.value as Map<String,String>
+            val map = dataSnapshot.value as Map<String, String>
             user_name = map["name"] ?: ""
 
         }
 
     }
 
-    private val mEventPinListener = object : ValueEventListener{
+    private val mEventPinListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
 
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            val map = dataSnapshot.value as Map<String,String>
+            val map = dataSnapshot.value as Map<String, String>
             val name = map["user"]
             val latitude = map["latitude"] ?: ""
             val longitude = map["longitude"] ?: ""
@@ -261,7 +256,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
                     var mylat = p.latitude.toString()
                     var mylon = p.longitude.toString()
-                    println("データ"+datakeido[count]+"緯度"+dataido[count]+"番号"+count)
+                    println("データ" + datakeido[count] + "緯度" + dataido[count] + "番号" + count)
                     //出発地、目的地、移動手段を設定
                     routeOverlay.setRoutePos(
                         GeoPoint(mylat.replace(".", "").toInt(), mylon.replace(".", "").toInt()),
@@ -289,13 +284,13 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     }
 
-    private val mEvent = object : ValueEventListener{
+    private val mEvent = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
 
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if(dataSnapshot.value != null) {
+            if (dataSnapshot.value != null) {
                 count++
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = dataSnapshot.key
@@ -303,6 +298,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 println("刺した${user_id}  ${nowfriendname}  ${datakeido[count]}  ${dataido[count]} $count ")
 
                 navUsername.text = user_name
+
+                //リストアラート
+                val alert_menu = arrayOf(nowfriendname)
+
 
 
                 //相手の現在地をピンで表示
@@ -312,7 +311,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 map()
                 Map.getOverlays().add(pinOverlay)
 
-                pinOverlay.addPoint(mid, nowfriendname,"a")
+                pinOverlay.addPoint(mid, nowfriendname, "a")
 
                 val fkeido = datakeido[count]
                 val fido = dataido[count]
@@ -329,7 +328,8 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                                 //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location").child(user_id.toString())
                                 //mLocationRef!!.addValueEventListener(mEventPinListener)
 //RouteOverlay作成
-                                val routeOverlay = RouteOverlay(context, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
+                                val routeOverlay =
+                                    RouteOverlay(context, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
 
                                 //出発地ピンの吹き出し設定
                                 routeOverlay.setStartTitle("現在地")
@@ -352,7 +352,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
                                         var mylat = p.latitude.toString()
                                         var mylon = p.longitude.toString()
-                                        println("データ"+fkeido+"緯度"+fido)
+                                        println("データ" + fkeido + "緯度" + fido)
                                         //出発地、目的地、移動手段を設定
                                         routeOverlay.setRoutePos(
                                             GeoPoint(mylat.replace(".", "").toInt(), mylon.replace(".", "").toInt()),
@@ -412,8 +412,21 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 shareUser.gravity = Gravity.TOP
                 shareUser.setBackgroundColor(Color.GRAY)
                 shareUser.setOnClickListener {
+
+                    val alert = AlertDialog.Builder(this@MainActivity)
+                    alert.setTitle("")
+                    alert.setItems(alert_menu) { dialog, idx ->
+                        // リストアイテムを選択したときの処理
+                        // 上に移動
+                        if (idx == 0) {
+
+                        } else if (idx == 1) {
+
+                        }
+                    }
+                    alert.show()
                     //地図移動
-                    Map.mapController.animateTo(mid)
+                    //Map.mapController.animateTo(mid)
                 }
 
                 Map.addView(shareUser)
@@ -423,7 +436,11 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     }
 
-    private val mEventfriendListener = object  : ChildEventListener{
+    fun listdialog(){
+
+    }
+
+    private val mEventfriendListener = object : ChildEventListener {
         override fun onChildMoved(p0: DataSnapshot, p1: String?) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
@@ -449,7 +466,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         }
 
 
-
     }
 
 
@@ -460,7 +476,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
                 val map = dataSnapshot.value as Map<String, String>
                 //val user_id = map["user_id"] ?: ""
-                val user_id = dataSnapshot.key ?:""
+                val user_id = dataSnapshot.key ?: ""
                 val latitude = map["latitude"] ?: ""
                 val longitude = map["longitude"] ?: ""
 
@@ -512,9 +528,9 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         mLocationRef!!.addListenerForSingleValueEvent(mEventname)
 
         //NavigationdrawerのユーザID
-        val navigation : NavigationView  = findViewById(R.id.nav_view)
-        val headerView : View = navigation.getHeaderView(0)
-        val navUserid : TextView = headerView.findViewById(R.id.nav_id)
+        val navigation: NavigationView = findViewById(R.id.nav_view)
+        val headerView: View = navigation.getHeaderView(0)
+        val navUserid: TextView = headerView.findViewById(R.id.nav_id)
         navUsername = headerView.findViewById(R.id.nav_name)
 
         navUsername.text = user_name
@@ -574,7 +590,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         }
 
         //WeatherOverlayを作成
-        val weatherOverlay =  WeatherOverlay(this)
+        val weatherOverlay = WeatherOverlay(this)
 
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
 
@@ -589,7 +605,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 //WeatherOverlayListenerを設定
                 weatherOverlay.setWeatherOverlayListener(this)
                 Map.getOverlays().add(weatherOverlay)
-            }else{
+            } else {
                 Map.getOverlays().remove(weatherOverlay)
             }
         }
@@ -633,8 +649,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         //地図を表示
         //Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
         //setContentView(Map)
-
-
 
 
         val layout = LinearLayout(this)
@@ -712,7 +726,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         // Handle navigation view item clicks here.
         val id = item.itemId
 
-        when(id){
+        when (id) {
             R.id.nav_map -> {
                 Map.setMapType(0)
             }
@@ -740,8 +754,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
-
-
 
 
     fun RouteFind() {
