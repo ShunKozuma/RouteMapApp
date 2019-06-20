@@ -18,6 +18,7 @@ import jp.co.yahoo.android.maps.GeoPoint
 import jp.co.yahoo.android.maps.MapView
 import jp.co.yahoo.android.maps.MyLocationOverlay
 
+
 class ListFriendFragment : Fragment() {
 
     lateinit var mapView: MapView
@@ -54,8 +55,9 @@ class ListFriendFragment : Fragment() {
 
     var count = -1
 
-    lateinit var friend: Friends
+    var counts = -1
 
+    lateinit var friend: Friends
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -96,7 +98,6 @@ class ListFriendFragment : Fragment() {
         }
 
         mListView.choiceMode = ListView.CHOICE_MODE_NONE
-
 
 
     }
@@ -157,14 +158,23 @@ class ListFriendFragment : Fragment() {
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
-            if (dataSnapshot.value != null) {
+            counts++
+            println("カウント"+counts)
+            if (dataSnapshot.value != null  && counts <= mFriendArrayList.size - 1) {
                 val map = dataSnapshot.value as Map<String, String>
-                val user_id = map["user_id"] ?: ""
-                mAdapter.friendRecieve = user_id
+                //val user_id = map["user_id"] ?: ""
+                val user_id = ""
+                for (user_id in map.keys) {
+                    println("nums" + user_id + counts)
+                    //mAdapter.friendRecieve = numm
+                    if(mFriendArrayList[counts].friend_uid == user_id){
+                        mFriendArrayList[counts].recieveBoolean = true
+                        mAdapter.notifyDataSetChanged()
+                    }
+
+                }
+
             }
-
-            mAdapter.notifyDataSetChanged()
-
 
         }
 
@@ -181,20 +191,20 @@ class ListFriendFragment : Fragment() {
             count++
 //            println("配列の行数" + (mFriendArrayList.size - 1))
 //                    && count <= mFriendArrayList.size - 1
-            if (dataSnapshot.value != null ) {
+            if (dataSnapshot.value != null) {
                 val map = dataSnapshot.value as Map<String, String>
-                val user_id = map["user_id"] ?: ""
+                //val user_id = map["user_id"] ?: ""
+                //val frienduser_id = dataSnapshot.key?: ""
 
-                if (user_id.equals(user)) {
+
+                if (dataSnapshot.value.toString().contains(user)  && count <= mFriendArrayList.size - 1) {
                     mFriendArrayList[count].sendBoolean = true
-                    println("友達：${mFriendArrayList[count].name}${mFriendArrayList[count].sendBoolean}")
+                    println("送信：${mFriendArrayList[count].name}${mFriendArrayList[count].sendBoolean}")
                     mAdapter.notifyDataSetChanged()
-
                 }
+
             }
 
-            mFriendRecieveRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-            mFriendRecieveRef!!.addValueEventListener(mEventRecieveListener)
 
             //mAdapter.notifyDataSetChanged()
 
@@ -210,7 +220,7 @@ class ListFriendFragment : Fragment() {
             val map = dataSnapshot.value as Map<String, String>
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key ?: ""
-            val friend = Friends(friend_uid, name, null)
+            val friend = Friends(friend_uid, name, null, null)
             text.add(friend_uid)
 
             mFriendArrayList.add(friend)
@@ -219,6 +229,9 @@ class ListFriendFragment : Fragment() {
 
             mFriendSendRef = mDatabaseReference.child(UsersPATH).child(friend_uid).child("location")
             mFriendSendRef!!.addValueEventListener(mEventSendListener)
+
+            mFriendRecieveRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+            mFriendRecieveRef!!.addValueEventListener(mEventRecieveListener)
 
         }
 
@@ -265,6 +278,8 @@ class ListFriendFragment : Fragment() {
 
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListener)
+
+
 
 //        mFriendRecieveRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
 //        mFriendRecieveRef!!.addValueEventListener(mEventRecieveListener)
@@ -317,13 +332,13 @@ class ListFriendFragment : Fragment() {
                 println(keido)
                 println(ido)
 
-                val locationdataRef = mDatabaseReference.child(UsersPATH).child(addid).child("location")
+                val locationdataRef = mDatabaseReference.child(UsersPATH).child(addid).child("location").child(user)
 
                 val datadouble = HashMap<String, String>()
                 //現在地情報をFirebaseに保存
                 datadouble["latitude"] = keido.toString()
                 datadouble["longitude"] = ido.toString()
-                datadouble["user_id"] = user
+                //datadouble["user_id"] = user
 
                 locationdataRef.setValue(datadouble)
 

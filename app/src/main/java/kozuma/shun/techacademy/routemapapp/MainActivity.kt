@@ -86,6 +86,14 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
 
 
+    var datakeido = mutableListOf<Int>()
+    var dataido = mutableListOf<Int>()
+
+    var count = -1
+
+
+
+
     //WeatherOverlayのインターフェース
     override fun finishUpdateWeather(p0: WeatherOverlay?) {
 
@@ -224,16 +232,18 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if(dataSnapshot.value != null) {
-
+                count++
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = dataSnapshot.key
                 nowfriendname = map["name"] ?: ""
+                println("刺した${user_id}  ${nowfriendname}  ${datakeido[count]}  ${dataido[count]} $count ")
 
                 navUsername.text = user_name
 
 
                 //相手の現在地をピンで表示
-                val mid = GeoPoint(keido, ido)
+                //val mid = GeoPoint(keido, ido)
+                val mid = GeoPoint(datakeido[count], dataido[count])
                 val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
                 map()
                 Map.getOverlays().add(pinOverlay)
@@ -296,6 +306,35 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     }
 
+    private val mEventfriendListener = object  : ChildEventListener{
+        override fun onChildMoved(p0: DataSnapshot, p1: String?) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onChildChanged(p0: DataSnapshot, p1: String?) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
+            val map = dataSnapshot.value as Map<String, String>
+            val friend_id = dataSnapshot.key ?: ""
+
+            mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location").child(friend_id)
+            mLocationRef!!.addValueEventListener(mEventListener)
+        }
+
+        override fun onChildRemoved(p0: DataSnapshot) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun onCancelled(p0: DatabaseError) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+
+
+    }
+
 
     private val mEventListener = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -303,15 +342,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             if (dataSnapshot.value != null) {
 
                 val map = dataSnapshot.value as Map<String, String>
-                val user_id = map["user_id"] ?: ""
+                //val user_id = map["user_id"] ?: ""
+                val user_id = dataSnapshot.key ?:""
                 val latitude = map["latitude"] ?: ""
                 val longitude = map["longitude"] ?: ""
-
-
-                println(latitude)
-                println(longitude)
-                println(user_id)
-
 
 
                 //経度緯度情報に小数点がふくまれるGeoPointはInt型の引数のため変更
@@ -319,6 +353,8 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 keido = latitude.replace(".", "").toInt()
                 println(keido)
                 ido = longitude.replace(".", "").toInt()
+                datakeido.add(keido)
+                dataido.add(ido)
 
 
 //                if(arjudge==false){
@@ -327,7 +363,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 //                }
                 mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("friend").child(user_id)
                 mLocationRef!!.addListenerForSingleValueEvent(mEvent)
-
 
             }
 
@@ -467,8 +502,12 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     fun locationdata() {
 
 
-        mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-        mLocationRef!!.addValueEventListener(mEventListener)
+        //フレンド一覧
+        mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
+        mLocationRef!!.addChildEventListener(mEventfriendListener)
+
+        //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+        //mLocationRef!!.addValueEventListener(mEventListener)
 
     }
 

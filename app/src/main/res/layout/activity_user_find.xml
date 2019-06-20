@@ -8,7 +8,7 @@
         tools:context=".UserFindActivity">
 
     <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="10dp"
@@ -25,7 +25,7 @@
                     android:id="@+id/FindEditText"
                     android:hint="ユーザーID"
                     android:text=""
-                    android:layout_weight="0.6"/>
+                    android:layout_weight="0.4"/>
         </android.support.design.widget.TextInputLayout>
 
         <Button
@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/FindButton"
                 android:text="検索"
-                android:layout_weight="0.4"
+                android:layout_weight="0.5"
                 tools:ignore="MissingConstraints"/>
 
     </LinearLayout>

@@ -167,7 +167,7 @@ class FriendsListActivity : AppCompatActivity() {
             val map = dataSnapshot.value as Map<String, String>
             val name = map["name"] ?: ""
             val friend_uid = dataSnapshot.key ?: ""
-            val friend = Friends(friend_uid, name,false)
+            val friend = Friends(friend_uid, name,false,false)
 
             text.add(friend_uid)
             mFriendArrayList.add(friend)

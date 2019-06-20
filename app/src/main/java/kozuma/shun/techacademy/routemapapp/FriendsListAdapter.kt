@@ -85,12 +85,13 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
             val sText = convertView!!.findViewById<View>(R.id.SData) as TextView
 
             println("どっち" + mFriendArrayList[position].sendBoolean)
+            println("できて"+mFriendArrayList[position].recieveBoolean)
 
-            if(friendRecieve == mFriendArrayList[position].friend_uid && mFriendArrayList[position].sendBoolean == true){
+            if(mFriendArrayList[position].recieveBoolean == true && mFriendArrayList[position].sendBoolean == true){
                 shareText.text = "現在地送受信中"
             }else if (mFriendArrayList[position].sendBoolean == true) {
                 shareText.text = "現在地送信中"
-            }else if (friendRecieve == mFriendArrayList[position].friend_uid) {
+            }else if (mFriendArrayList[position].recieveBoolean == true) {
                 shareText.text = "現在地受信中"
             }
 
