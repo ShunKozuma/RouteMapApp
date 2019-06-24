@@ -1,11 +1,14 @@
 package kozuma.shun.techacademy.routemapapp
 
-import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import android.view.MotionEvent
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_user_find.*
 
 class UserFindActivity : AppCompatActivity() {
@@ -18,6 +21,8 @@ class UserFindActivity : AppCompatActivity() {
     private var id: String? = null
 
     private var name: Any? = null
+
+    private lateinit var animation: Animation
 
     private val mEventListner = object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -113,6 +118,22 @@ class UserFindActivity : AppCompatActivity() {
                 mFriendRef!!.addListenerForSingleValueEvent(mEventListner)
             }
         }
+
+        animation = AnimationUtils.loadAnimation(this, R.anim.translate_animation)
+
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        //super.onTouchEvent(event)
+        when(event!!.action){
+            MotionEvent.ACTION_DOWN -> {
+                println("タッチ")
+                recievebutton.startAnimation(animation)
+            }
+
+        }
+
+        return true
 
     }
 

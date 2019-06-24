@@ -20,6 +20,8 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
@@ -93,6 +95,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     lateinit var adapter: ArrayAdapter<String>
     //val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
 
+    private lateinit var animation: Animation
 
     //WeatherOverlayのインターフェース
     override fun finishUpdateWeather(p0: WeatherOverlay?) {
@@ -631,8 +634,23 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
 
+        animation = AnimationUtils.loadAnimation(this, R.anim.translate_animation)
 
+
+
+        maps.setOnTouchListener { v: View?, event: MotionEvent? ->
+
+            when (event!!.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    println("タッチ")
+                    recievebutton.startAnimation(animation)
+                }
+            }
+            true
+        }
     }
+
+
 
 
     fun displayPopupWindow(anchorView: View) {
@@ -731,17 +749,17 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         layout.setPadding(0, 0, 20, 30)
 
 
-        //AR表示ボタンの追加
-        val ArButton = Button(this)
-        ArButton.layoutParams =
-            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        ArButton.text = "AR表示"
-        ArButton.setOnClickListener {
-            //ArView()
-            val intent = Intent(applicationContext, ARViewActivity::class.java)
-            startActivity(intent)
-        }
-        layout.addView(ArButton)
+//        //AR表示ボタンの追加
+//        val ArButton = Button(this)
+//        ArButton.layoutParams =
+//            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+//        ArButton.text = "AR表示"
+//        ArButton.setOnClickListener {
+//            //ArView()
+//            val intent = Intent(applicationContext, ARViewActivity::class.java)
+//            startActivity(intent)
+//        }
+//        layout.addView(ArButton)
 
 
         //現在地を表示するボタン
@@ -767,7 +785,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         val fabimage = BitmapFactory.decodeResource(resources, R.drawable.plus)
         fab.setImageBitmap(fabimage)
         layout.addView(fab)
-
 
         Map.addView(layout)
 
