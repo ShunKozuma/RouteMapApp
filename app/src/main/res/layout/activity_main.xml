@@ -23,6 +23,10 @@
             android:layout_height="match_parent"
             android:id="@+id/maps">
 
+        <Button android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:id="@+id/recievebutton"
+                android:text="受信リスト"
+                android:visibility="invisible"/>
     </FrameLayout>
 
     <android.support.design.widget.NavigationView

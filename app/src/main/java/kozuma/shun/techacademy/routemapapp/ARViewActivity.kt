@@ -1,26 +1,18 @@
 package kozuma.shun.techacademy.routemapapp
 
 import android.Manifest
-import android.app.Activity
-import android.content.DialogInterface
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.os.Build
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.util.Log
-import android.view.Gravity
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import jp.co.yahoo.android.maps.*
+import jp.co.yahoo.android.maps.GeoPoint
+import jp.co.yahoo.android.maps.MapActivity
+import jp.co.yahoo.android.maps.MapView
+import jp.co.yahoo.android.maps.MyLocationOverlay
 import jp.co.yahoo.android.maps.ar.ARController
 import jp.co.yahoo.android.maps.ar.ARControllerListener
 import jp.co.yahoo.android.maps.navi.NaviController
@@ -196,27 +188,34 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
         super.onCreate(savedInstanceState)
         //setContentView(R.layout.activity_arview)
 
+
+        val popkeido = intent.getStringExtra("popkeido").toInt()
+
+        val popido = intent.getStringExtra("popido").toInt()
         // パーミッションの許可状態を確認する
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 // 許可されていないので許可ダイアログを表示する
                 requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSIONS_REQUEST_CODE)
             } else {
-                ARView()
+
+                ARView(popkeido,popido)
             }
         }
 
     }
 
-    fun ARView() {
+
+
+    fun ARView(arkeido: Int ,arido: Int) {
         Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
 
 
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
-        mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-        mLocationRef!!.addValueEventListener(mEventListener)
+        //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
+        //mLocationRef!!.addValueEventListener(mEventListener)
 
         //RouteOverlay作成
         routeOverlay = RouteOverlay(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
@@ -245,7 +244,7 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
                 //出発地、目的地、移動手段を設定
                 routeOverlay.setRoutePos(
                     GeoPoint(mylat.replace(".", "").toInt(), mylon.replace(".", "").toInt()),
-                    GeoPoint(keido, ido),
+                    GeoPoint(arkeido, arido),
                     RouteOverlay.TRAFFIC_WALK
                 )
 
@@ -267,7 +266,7 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
             100 -> { //ActivityCompat#requestPermissions()の第2引数で指定した値
                 if (grantResults.size > 0 && grantResults[0] === PackageManager.PERMISSION_GRANTED) {
                     //許可された場合の処理
-                    ARView()
+                    ARView(intent.getStringExtra("popkeido").toInt(),intent.getStringExtra("popido").toInt())
                 } else {
                     //拒否された場合の処理
                     Toast.makeText(this, "AR表示機能が正しく動作しません。", Toast.LENGTH_LONG).show()

@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -30,6 +29,7 @@ import jp.co.yahoo.android.maps.ar.ARControllerListener
 import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
 import jp.co.yahoo.android.maps.weather.WeatherOverlay
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
@@ -80,13 +80,18 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     lateinit var navUsername: TextView
 
     //共有中の友達
-    //var nowfriendname: String? = null
+    var nowfriend = mutableListOf<String>()
 
 
     var datakeido = mutableListOf<Int>()
     var dataido = mutableListOf<Int>()
 
     var count = -1
+
+
+    //popupのアダプター
+    lateinit var adapter: ArrayAdapter<String>
+    //val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
 
 
     //WeatherOverlayのインターフェース
@@ -253,7 +258,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                     //現在位置を取得
                     p = _overlay!!.myLocation
 
-
                     var mylat = p.latitude.toString()
                     var mylon = p.longitude.toString()
                     println("データ" + datakeido[count] + "緯度" + dataido[count] + "番号" + count)
@@ -279,10 +283,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 }
             })
 
-
         }
 
     }
+
 
     private val mEvent = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
@@ -297,11 +301,12 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 val nowfriendname = map["name"] ?: ""
                 println("刺した${user_id}  ${nowfriendname}  ${datakeido[count]}  ${dataido[count]} $count ")
 
+                nowfriend.add(nowfriendname)
+
                 navUsername.text = user_name
 
                 //リストアラート
                 val alert_menu = arrayOf(nowfriendname)
-
 
 
                 //相手の現在地をピンで表示
@@ -327,7 +332,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
                                 //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location").child(user_id.toString())
                                 //mLocationRef!!.addValueEventListener(mEventPinListener)
-//RouteOverlay作成
+                                //RouteOverlay作成
                                 val routeOverlay =
                                     RouteOverlay(context, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
 
@@ -402,7 +407,9 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 Map.getOverlays().add(popupOverlay)
                 pinOverlay.setOnFocusChangeListener(popupOverlay)
 
+                recievebutton.visibility = View.VISIBLE
                 //共有中のユーザー表示
+                /*
                 val shareUser = TextView(context)
                 shareUser.layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -425,20 +432,19 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                         }
                     }
                     alert.show()
+                    */
                     //地図移動
                     //Map.mapController.animateTo(mid)
                 }
 
-                Map.addView(shareUser)
-            }
+
+                //Map.addView(shareUser)
+            //}
 
         }
 
     }
 
-    fun listdialog(){
-
-    }
 
     private val mEventfriendListener = object : ChildEventListener {
         override fun onChildMoved(p0: DataSnapshot, p1: String?) {
@@ -546,6 +552,12 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         context = this
 
+        recievebutton.setOnClickListener {
+            //val intent = Intent(applicationContext, PopupListActivity::class.java)
+            //startActivity(intent)
+            displayPopupWindow(it)
+        }
+
 
         // パーミッションの許可状態を確認する
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -614,15 +626,72 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         // 取得したメニューにトグルスイッチを設定
         menuItem2.actionView = switch1
 
-
         navigationView.setNavigationItemSelectedListener(this)
+
+
+        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
 
 
     }
 
+
+    fun displayPopupWindow(anchorView: View) {
+        val popup = PopupWindow(this)
+        val poplayout: View = layoutInflater.inflate(R.layout.activity_popup_list, null)
+        popup.setContentView(poplayout)
+        // Set content width and height
+        popup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT)
+        popup.setWidth(WindowManager.LayoutParams.WRAP_CONTENT)
+        // Closes the popup window when touch outside of it - when looses focus
+        // 背景設定
+        popup.setBackgroundDrawable(getResources().getDrawable(R.color.white))
+        popup.setOutsideTouchable(true)
+        popup.setFocusable(true)
+
+        var listView: ListView = poplayout.findViewById(R.id.listView)
+        //val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
+        listView.adapter = adapter
+
+        //ListViewを長押ししたときの処理
+        listView.setOnItemClickListener { parent, _, position, _ ->
+            // アラートダイアログ
+            alertCheck(datakeido[position],dataido[position],position)
+
+            true
+        }
+        // Show anchored to button
+        popup.showAsDropDown(anchorView)
+    }
+
+    private fun alertCheck(popkeido: Int,popido: Int,position: Int) {
+        val alert_menu = arrayOf("マップ移動", "ルート探索", "AR表示", "キャンセル")
+
+        val alert = AlertDialog.Builder(this)
+        alert.setTitle("")
+        alert.setItems(alert_menu) { dialog, idx ->
+            // リストアイテムを選択したときの処理
+            // 上に移動
+            val mid = GeoPoint(popkeido, popido)
+            if (idx == 0) {
+                Map.mapController.animateTo(mid)
+            } else if (idx == 1) {
+                RouteFind(popkeido,popido,position)
+                Map.mapController.animateTo(mid)
+            } else if (idx == 2) {
+                val intent = Intent(applicationContext, ARViewActivity::class.java)
+                intent.putExtra("popkeido", popkeido.toString())
+                intent.putExtra("popido", popido.toString())
+                startActivity(intent)
+            } else {
+
+            }
+        }
+        alert.show()
+    }
+
     override fun onResume() {
         super.onResume()
-
+        adapter.clear()
         //マップ表示
         map()
         //受信
@@ -671,8 +740,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             //ArView()
             val intent = Intent(applicationContext, ARViewActivity::class.java)
             startActivity(intent)
-
-
         }
         layout.addView(ArButton)
 
@@ -756,7 +823,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     }
 
 
-    fun RouteFind() {
+    fun RouteFind(findkeido: Int, findido: Int, position: Int) {
 
         //RouteOverlay作成
         val routeOverlay = RouteOverlay(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
@@ -765,7 +832,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         routeOverlay.setStartTitle("現在地")
 
         //目的地ピンの吹き出し設定
-        routeOverlay.setGoalTitle("OOさん")
+        routeOverlay.setGoalTitle(nowfriend[position])
 
         //MyLocationOverlayインスタンス作成
         _overlay = MyLocationOverlay(applicationContext, Map)
@@ -785,7 +852,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 //出発地、目的地、移動手段を設定
                 routeOverlay.setRoutePos(
                     GeoPoint(mylat.replace(".", "").toInt(), mylon.replace(".", "").toInt()),
-                    GeoPoint(datakeido[count], dataido[count]),
+                    GeoPoint(findkeido, findido),
                     RouteOverlay.TRAFFIC_WALK
                 )
 
