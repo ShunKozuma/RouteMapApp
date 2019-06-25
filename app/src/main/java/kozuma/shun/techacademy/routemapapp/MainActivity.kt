@@ -68,6 +68,10 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     //ボタン配置
     lateinit var currentButton: FloatingActionButton
 
+    lateinit var fab: FloatingActionButton
+
+    lateinit var layout: LinearLayout
+
     //Naviのインスタンス
     lateinit var naviController: NaviController
 
@@ -93,9 +97,22 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     //popupのアダプター
     lateinit var adapter: ArrayAdapter<String>
-    //val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
 
-    private lateinit var animation: Animation
+
+    private lateinit var Topupanimation: Animation
+    private lateinit var Topdownanimation: Animation
+    private lateinit var Endupanimation: Animation
+    private lateinit var Enddownanimation: Animation
+    var touch: Boolean = true
+    var touchID = 0
+
+    //各ボタンのXY
+    var recieveX = 0F
+    var recieveY = 0
+
+    var fablayoutX = 0
+    var fablayoutY = 0
+
 
     //WeatherOverlayのインターフェース
     override fun finishUpdateWeather(p0: WeatherOverlay?) {
@@ -316,7 +333,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 //val mid = GeoPoint(keido, ido)
                 val mid = GeoPoint(datakeido[count], dataido[count])
                 val pinOverlay = PinOverlay(PinOverlay.PIN_VIOLET)
-                map()
                 Map.getOverlays().add(pinOverlay)
 
                 pinOverlay.addPoint(mid, nowfriendname, "a")
@@ -436,12 +452,12 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                     }
                     alert.show()
                     */
-                    //地図移動
-                    //Map.mapController.animateTo(mid)
-                }
+                //地図移動
+                //Map.mapController.animateTo(mid)
+            }
 
 
-                //Map.addView(shareUser)
+            //Map.addView(shareUser)
             //}
 
         }
@@ -634,23 +650,110 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
 
-        animation = AnimationUtils.loadAnimation(this, R.anim.translate_animation)
+        Topupanimation = AnimationUtils.loadAnimation(this, R.anim.translate_animation)
+        Topdownanimation = AnimationUtils.loadAnimation(this, R.anim.translate_downanimation)
+        Endupanimation = AnimationUtils.loadAnimation(this, R.anim.rightend_upanimation)
+        Enddownanimation = AnimationUtils.loadAnimation(this, R.anim.rightend_downanimation)
 
 
+        //ボタンXY
+        recieveX = recievebutton.x
 
-        maps.setOnTouchListener { v: View?, event: MotionEvent? ->
+        recieveY
 
-            when (event!!.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    println("タッチ")
-                    recievebutton.startAnimation(animation)
-                }
-            }
-            true
+
+        ///レイアウト
+        layout = LinearLayout(this)
+        layout.layoutParams =
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        // 右部に配置
+        layout.gravity = Gravity.RIGHT or Gravity.BOTTOM
+        // Verticalに設定する
+        layout.orientation = LinearLayout.VERTICAL
+
+        layout.setPadding(0, 0, 20, 30)
+
+
+        //現在地を表示するボタン
+        currentButton = FloatingActionButton(this)
+        currentButton.setOnClickListener {
+            MyLocationData()
         }
+        //現在地画像
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.now)
+        currentButton.setImageBitmap(bitmap)
+        //ボタン追加
+        layout.addView(currentButton)
+
+
+        //友達リストボタンの追加
+        //val fab = FloatingActionButton(this)
+        fab = FloatingActionButton(this)
+        fab.setOnClickListener {
+            val intent = Intent(applicationContext, ListFriendActivity::class.java)
+            intent.putExtra("button", "0")
+            startActivity(intent)
+        }
+
+        val fabimage = BitmapFactory.decodeResource(resources, R.drawable.plus)
+        fab.setImageBitmap(fabimage)
+        layout.addView(fab)
+
+        Map.addView(layout)
+
+        fablayoutX = layout.left
+        fablayoutY = layout.top
+
+        maps.setOnClickListener {
+            println("長押し")
+        }
+
     }
 
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        super.dispatchTouchEvent(ev)
+
+
+        when (ev!!.action) {
+            MotionEvent.ACTION_UP-> {
+                println(ev.x.toString() + ">=" + (currentButton.x-20) + "&&" + ev.y + ">=" + currentButton.top + 30)
+                when (touchID) {
+                    0 -> {
+                       // if (ev.x >= recievebutton.x && ev.y <= recievebutton.height +recievebutton.height/2 ) {
+                        if(ev.x >= recievebutton.x && ev.y <= recievebutton.height +recievebutton.height/2 || ev.x >=  currentButton.x-20 &&  ev.y >= currentButton.top+30){
+                            touchID = 3
+                        } else {
+                            recievebutton.startAnimation(Topupanimation)
+                            layout.startAnimation(Enddownanimation)
+                            touch = false
+                            touchID = 1
+                        }
+
+                    }
+                    1 -> {
+
+                        println("タッチ false")
+                        recievebutton.startAnimation(Topdownanimation)
+                        layout.startAnimation(Endupanimation)
+                        touch = true
+                        touchID = 0
+
+                    }
+                    3 ->{
+                        touchID = 0
+                    }
+                }
+            }
+            MotionEvent.ACTION_MOVE->{
+                println("スクロール")
+            }
+
+        }
+
+        return false
+
+    }
 
 
     fun displayPopupWindow(anchorView: View) {
@@ -673,7 +776,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         //ListViewを長押ししたときの処理
         listView.setOnItemClickListener { parent, _, position, _ ->
             // アラートダイアログ
-            alertCheck(datakeido[position],dataido[position],position)
+            alertCheck(datakeido[position], dataido[position], position)
 
             true
         }
@@ -681,7 +784,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         popup.showAsDropDown(anchorView)
     }
 
-    private fun alertCheck(popkeido: Int,popido: Int,position: Int) {
+    private fun alertCheck(popkeido: Int, popido: Int, position: Int) {
         val alert_menu = arrayOf("マップ移動", "ルート探索", "AR表示", "キャンセル")
 
         val alert = AlertDialog.Builder(this)
@@ -693,7 +796,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             if (idx == 0) {
                 Map.mapController.animateTo(mid)
             } else if (idx == 1) {
-                RouteFind(popkeido,popido,position)
+                RouteFind(popkeido, popido, position)
                 Map.mapController.animateTo(mid)
             } else if (idx == 2) {
                 val intent = Intent(applicationContext, ARViewActivity::class.java)
@@ -711,7 +814,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         super.onResume()
         adapter.clear()
         //マップ表示
-        map()
+        //map()
         //受信
         locationdata()
 
@@ -730,65 +833,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     }
 
-
-    fun map() {
-
-        //地図を表示
-        //Map = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
-        //setContentView(Map)
-
-
-        val layout = LinearLayout(this)
-        layout.layoutParams =
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        // 右部に配置
-        layout.gravity = Gravity.RIGHT or Gravity.BOTTOM
-        // Verticalに設定する
-        layout.orientation = LinearLayout.VERTICAL
-
-        layout.setPadding(0, 0, 20, 30)
-
-
-//        //AR表示ボタンの追加
-//        val ArButton = Button(this)
-//        ArButton.layoutParams =
-//            LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-//        ArButton.text = "AR表示"
-//        ArButton.setOnClickListener {
-//            //ArView()
-//            val intent = Intent(applicationContext, ARViewActivity::class.java)
-//            startActivity(intent)
-//        }
-//        layout.addView(ArButton)
-
-
-        //現在地を表示するボタン
-        currentButton = FloatingActionButton(this)
-        currentButton.setOnClickListener {
-            MyLocationData()
-        }
-        //現在地画像
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.now)
-        currentButton.setImageBitmap(bitmap)
-        //ボタン追加
-        layout.addView(currentButton)
-
-
-        //友達リストボタンの追加
-        val fab = FloatingActionButton(this)
-        fab.setOnClickListener {
-            val intent = Intent(applicationContext, ListFriendActivity::class.java)
-            intent.putExtra("button", "0")
-            startActivity(intent)
-        }
-
-        val fabimage = BitmapFactory.decodeResource(resources, R.drawable.plus)
-        fab.setImageBitmap(fabimage)
-        layout.addView(fab)
-
-        Map.addView(layout)
-
-    }
 
     override fun onBackPressed() {
         val drawer = DrawerLayout(this)

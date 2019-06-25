@@ -14,21 +14,25 @@
 
 <android.support.v4.widget.DrawerLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/drawer_layout"
         xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
     <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/maps">
+            android:id="@+id/maps"
+            android:focusableInTouchMode="true">
 
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/recievebutton"
-                android:text="受信リスト"
+                android:text="受信者リスト"
+                android:layout_gravity="right"
                 android:visibility="invisible"/>
+
+
     </FrameLayout>
 
     <android.support.design.widget.NavigationView
@@ -38,7 +42,8 @@
             android:layout_gravity="start"
             android:fitsSystemWindows="true"
             app:headerLayout="@layout/nav_header_main"
-            app:menu="@menu/activity_main_drawer" />
+            app:menu="@menu/activity_main_drawer">
+    </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>
 
 
