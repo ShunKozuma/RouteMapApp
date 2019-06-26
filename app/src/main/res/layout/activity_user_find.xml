@@ -28,9 +28,11 @@
         </android.support.design.widget.TextInputLayout>
 
         <Button
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/FindButton"
+                android:theme="@style/AppTheme.RaisedButton"
                 android:text="検索"
                 tools:ignore="MissingConstraints"/>
 
@@ -55,6 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/AddFindButton"
+                android:theme="@style/AppTheme.RaisedButton"
                 android:visibility="invisible"
         />
     </LinearLayout>

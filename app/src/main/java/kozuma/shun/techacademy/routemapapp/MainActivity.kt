@@ -1,6 +1,7 @@
 package kozuma.shun.techacademy.routemapapp
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
@@ -315,6 +316,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         }
 
+        @SuppressLint("RestrictedApi")
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.value != null) {
                 count++
@@ -780,7 +782,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         popup.setContentView(poplayout)
         // Set content width and height
         popup.setHeight(WindowManager.LayoutParams.WRAP_CONTENT)
-        popup.setWidth(WindowManager.LayoutParams.WRAP_CONTENT)
+        popup.setWidth(400)
         // Closes the popup window when touch outside of it - when looses focus
         // 背景設定
         popup.setBackgroundDrawable(getResources().getDrawable(R.color.white))

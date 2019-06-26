@@ -14,11 +14,15 @@
         <Button
                 android:text="ログイン"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/loginScreenButton" android:layout_weight="1"/>
+                android:theme="@style/AppTheme.RaisedButton"
+                android:layout_height="wrap_content"
+                android:id="@+id/loginScreenButton" android:layout_weight="1"/>
         <Button
                 android:text="新規登録"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/customButton" android:layout_weight="1"/>
+                android:theme="@style/AppTheme.RaisedButton"
+                android:layout_height="wrap_content"
+                android:id="@+id/customButton" android:layout_weight="1"/>
     </LinearLayout>
 
     <LinearLayout
@@ -56,6 +60,7 @@
         </android.support.design.widget.TextInputLayout>
         <Button
                 android:text="ログイン"
+                android:theme="@style/AppTheme.RaisedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:id="@+id/loginButton"
                 android:layout_marginTop="50dp"

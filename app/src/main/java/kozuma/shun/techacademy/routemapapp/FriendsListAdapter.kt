@@ -96,14 +96,14 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
                 //shareText.text = "現在地送受信中"
                 //shareText.text = "↓"
                 //shareView.setImageResource(R.mipmap.now)
-                shareupView.setImageResource(R.mipmap.arrowup)
-                sharedownView.setImageResource(R.mipmap.arrowdown)
+                //shareupView.setImageResource(R.mipmap.arrowup)
+                sharedownView.setImageResource(R.mipmap.arrowupdown)
 
             }else if (mFriendArrayList[position].sendBoolean == true) {
                 //shareText.text = "現在地送信中"
                 //shareText.text = "↑"
                 //shareView.setImageResource(R.mipmap.now)
-                shareupView.setImageResource(R.mipmap.arrowup)
+                sharedownView.setImageResource(R.mipmap.arrowup)
             }else if (mFriendArrayList[position].recieveBoolean == true) {
                 //shareText.text = "現在地受信中"
                 //shareText.text = "↑↓"

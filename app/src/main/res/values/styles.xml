@@ -10,5 +10,13 @@
     </style>
 
 
+
+    <style name="AppTheme.RaisedButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/colorPrimary</item>
+        <item name="colorButtonNormal">@color/colorPrimaryDark</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+
 </resources>
 
