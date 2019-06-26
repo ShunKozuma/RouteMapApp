@@ -24,9 +24,11 @@
         </activity>
         <activity android:name=".ListAddFriendFragment">
         </activity>
-        <activity android:name=".ListFriendFragment">
+        <activity android:name=".ListFriendFragment"
+                  android:label="ユーザーリスト">
         </activity>
-        <activity android:name=".ListFriendActivity">
+        <activity android:name=".ListFriendActivity"
+                  android:label="ユーザーリスト">
         </activity>
         <activity android:name=".AddFriendFragment">
         </activity>
@@ -52,9 +54,11 @@
         </activity>
         <activity android:name=".FriendListActivity">
         </activity>
-        <activity android:name=".NewAccountActivity">
+        <activity android:name=".NewAccountActivity"
+                  android:label="新規作成">
         </activity>
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity"
+                  android:label="ログイン">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

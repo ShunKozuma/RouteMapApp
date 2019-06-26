@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
@@ -32,6 +33,7 @@ import jp.co.yahoo.android.maps.navi.NaviController
 import jp.co.yahoo.android.maps.routing.RouteOverlay
 import jp.co.yahoo.android.maps.weather.WeatherOverlay
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, NaviController.NaviControllerListener,
@@ -106,12 +108,14 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     var touch: Boolean = true
     var touchID = 0
 
-    //各ボタンのXY
-    var recieveX = 0F
-    var recieveY = 0
 
-    var fablayoutX = 0
-    var fablayoutY = 0
+    //タイマー
+    private var mTimer: Timer? = null
+
+    // タイマー用の時間のための変数
+    private var mTimerSec = 0.0
+
+    private var mHandler = Handler()
 
 
     //WeatherOverlayのインターフェース
@@ -125,9 +129,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     //ARControllerのインターフェース
     override fun ARControllerListenerOnPOIPick(p0: Int) {
-//        finish()
-//        val intent = Intent(applicationContext, MainActivity::class.java)
-//        startActivity(intent)
+
     }
 
     //NaviControllerのインターフェース
@@ -319,7 +321,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 val map = dataSnapshot.value as Map<String, String>
                 val user_id = dataSnapshot.key
                 val nowfriendname = map["name"] ?: ""
-                println("刺した${user_id}  ${nowfriendname}  ${datakeido[count]}  ${dataido[count]} $count ")
+//                println("刺した${user_id}  ${nowfriendname}  ${datakeido[count]}  ${dataido[count]} $count ")
 
                 nowfriend.add(nowfriendname)
 
@@ -467,11 +469,11 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     private val mEventfriendListener = object : ChildEventListener {
         override fun onChildMoved(p0: DataSnapshot, p1: String?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
         }
 
         override fun onChildChanged(p0: DataSnapshot, p1: String?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
         }
 
         override fun onChildAdded(dataSnapshot: DataSnapshot, p1: String?) {
@@ -483,11 +485,11 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         }
 
         override fun onChildRemoved(p0: DataSnapshot) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
         }
 
         override fun onCancelled(p0: DatabaseError) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
         }
 
 
@@ -656,12 +658,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         Enddownanimation = AnimationUtils.loadAnimation(this, R.anim.rightend_downanimation)
 
 
-        //ボタンXY
-        recieveX = recievebutton.x
-
-        recieveY
-
-
         ///レイアウト
         layout = LinearLayout(this)
         layout.layoutParams =
@@ -700,14 +696,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         layout.addView(fab)
 
         Map.addView(layout)
-
-        fablayoutX = layout.left
-        fablayoutY = layout.top
-
-        maps.setOnClickListener {
-            println("長押し")
-        }
-
     }
 
 
@@ -716,37 +704,67 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
 
         when (ev!!.action) {
-            MotionEvent.ACTION_UP-> {
-                println(ev.x.toString() + ">=" + (currentButton.x-20) + "&&" + ev.y + ">=" + currentButton.top + 30)
+            MotionEvent.ACTION_DOWN -> {
+                mTimer = Timer()
+                //println(ev.x.toString() + ">=" + (currentButton.x-20) + "&&" + ev.y + ">=" + currentButton.top + 30)
                 when (touchID) {
                     0 -> {
-                       // if (ev.x >= recievebutton.x && ev.y <= recievebutton.height +recievebutton.height/2 ) {
-                        if(ev.x >= recievebutton.x && ev.y <= recievebutton.height +recievebutton.height/2 || ev.x >=  currentButton.x-20 &&  ev.y >= currentButton.top+30){
-                            touchID = 3
+                        // if (ev.x >= recievebutton.x && ev.y <= recievebutton.height +recievebutton.height/2 ) {
+                        if (ev.x >= recievebutton.x && ev.y <= recievebutton.height + recievebutton.height / 2 || ev.x >= currentButton.x - 20 && ev.y >= currentButton.top + 30) {
+
                         } else {
-                            recievebutton.startAnimation(Topupanimation)
-                            layout.startAnimation(Enddownanimation)
-                            touch = false
-                            touchID = 1
+                            // タイマーの作成
+                            // タイマーの始動
+                            //mTimer = Timer()
+                            mTimer!!.schedule(object : TimerTask() {
+                                override fun run() {
+                                    mTimerSec += 0.1
+                                    mHandler.post {
+                                        println(mTimerSec)
+                                        if (mTimerSec >= 0.7) {
+                                            recievebutton.startAnimation(Topupanimation)
+                                            layout.startAnimation(Enddownanimation)
+                                            touch = false
+                                            touchID = 1
+                                            mTimer!!.cancel()
+                                            mTimerSec = 0.0
+                                        }
+                                    }
+                                }
+                            }, 0, 100) // 最初に始動させるまで 100ミリ秒、ループの間隔を 100ミリ秒 に設定
+
+
                         }
 
                     }
                     1 -> {
 
-                        println("タッチ false")
-                        recievebutton.startAnimation(Topdownanimation)
-                        layout.startAnimation(Endupanimation)
-                        touch = true
-                        touchID = 0
+                        //mTimer = Timer()
+                        mTimer!!.schedule(object : TimerTask() {
+                            override fun run() {
+                                mTimerSec += 0.1
+                                mHandler.post {
+                                    println(mTimerSec)
+                                    if (mTimerSec >= 0.7) {
+                                        recievebutton.startAnimation(Topdownanimation)
+                                        layout.startAnimation(Endupanimation)
+                                        touch = true
+                                        touchID = 0
+                                        mTimer!!.cancel()
+                                        mTimerSec = 0.0
+                                    }
+                                }
+                            }
+                        }, 0, 100) // 最初に始動させるまで 100ミリ秒、ループの間隔を 100ミリ秒 に設定
 
-                    }
-                    3 ->{
-                        touchID = 0
+
                     }
                 }
             }
-            MotionEvent.ACTION_MOVE->{
-                println("スクロール")
+
+            MotionEvent.ACTION_UP -> {
+                mTimer!!.cancel()
+                mTimerSec = 0.0
             }
 
         }
@@ -856,6 +874,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
         when (id) {
             R.id.nav_map -> {
+
                 Map.setMapType(0)
             }
             R.id.nav_map_air -> {

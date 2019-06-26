@@ -76,7 +76,7 @@ class FriendsListActivity : AppCompatActivity() {
 
     private val mEventSendListener = object : ValueEventListener {
         override fun onCancelled(p0: DatabaseError) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
         }
 
         override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -111,55 +111,6 @@ class FriendsListActivity : AppCompatActivity() {
         }
 
     }
-    /*
-    private val mEventSendListener = object : ChildEventListener {
-        override fun onChildMoved(dataSnapshot: DataSnapshot, p1: String?) {
-            println("count"+count)
-            count++
-            println("配列の行数" + (mFriendArrayList.size - 1))
-            if (dataSnapshot.value != null && count <= mFriendArrayList.size - 1) {
-                val map = dataSnapshot.value as Map<String, String>
-                val user_id = map["user_id"] ?: ""
-                val latitude = map["latitude"] ?: ""
-                val longitude = map["longitude"] ?: ""
-
-
-                println(latitude)
-                println(longitude)
-                println(user_id)
-
-
-                if (user_id.equals(user)) {
-                    println("Listの" + count)
-                    println("送信中の" + text[count])
-//                    mAdapter.friendPosition = count
-//                    mAdapter.friendSend = text[count]
-                    mAdapter.sendUserId(true,count,text[count])
-                    mAdapter.notifyDataSetChanged()
-
-                }
-            }
-        }
-
-        override fun onChildChanged(dataSnapshot: DataSnapshot, p1: String?) {
-
-        }
-
-        override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
-
-        }
-
-        override fun onChildRemoved(p0: DataSnapshot) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun onCancelled(p0: DatabaseError) {
-
-        }
-
-
-    }
-*/
 
     private val mEventListener = object : ChildEventListener {
 

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuth
 
@@ -80,19 +81,34 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
             val nameText = convertView!!.findViewById<View>(R.id.nameTextView) as TextView
             nameText.text = mFriendArrayList[position].name
 
-            val shareText = convertView!!.findViewById<View>(R.id.ShareData) as TextView
+            //val shareText = convertView!!.findViewById<View>(R.id.ShareData) as TextView
 
-            val sText = convertView!!.findViewById<View>(R.id.SData) as TextView
+            //val sText = convertView!!.findViewById<View>(R.id.SData) as TextView
+
+            //val shareView = convertView!!.findViewById<View>(R.id.ShareView) as ImageView
+            val shareupView = convertView!!.findViewById<View>(R.id.ShareUpView) as ImageView
+            val sharedownView = convertView!!.findViewById<View>(R.id.ShareDownView) as ImageView
 
             println("どっち" + mFriendArrayList[position].sendBoolean)
             println("できて"+mFriendArrayList[position].recieveBoolean)
 
             if(mFriendArrayList[position].recieveBoolean == true && mFriendArrayList[position].sendBoolean == true){
-                shareText.text = "現在地送受信中"
+                //shareText.text = "現在地送受信中"
+                //shareText.text = "↓"
+                //shareView.setImageResource(R.mipmap.now)
+                shareupView.setImageResource(R.mipmap.arrowup)
+                sharedownView.setImageResource(R.mipmap.arrowdown)
+
             }else if (mFriendArrayList[position].sendBoolean == true) {
-                shareText.text = "現在地送信中"
+                //shareText.text = "現在地送信中"
+                //shareText.text = "↑"
+                //shareView.setImageResource(R.mipmap.now)
+                shareupView.setImageResource(R.mipmap.arrowup)
             }else if (mFriendArrayList[position].recieveBoolean == true) {
-                shareText.text = "現在地受信中"
+                //shareText.text = "現在地受信中"
+                //shareText.text = "↑↓"
+                //shareView.setImageResource(R.mipmap.now)
+                sharedownView.setImageResource(R.mipmap.arrowdown)
             }
 
         } else {

@@ -91,7 +91,7 @@ class ListFriendAddFragment : Fragment() {
                         FriendListDialog()
                         activity!!.finish()
                         val intent = Intent(activity, ListFriendActivity::class.java)
-                        intent.putExtra("TAB_DATA", "3")
+                        //intent.putExtra("TAB_DATA", "3")
                         startActivity(intent)
                             //mAdapter.notifyDataSetChanged()
                         Toast.makeText(context, "申請を許可しました！", Toast.LENGTH_LONG).show()

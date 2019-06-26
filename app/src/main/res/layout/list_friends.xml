@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+                android:layout_height="match_parent" android:maxHeight="@android:dimen/dialog_min_width_major">
 
     <LinearLayout
             android:layout_width="match_parent"
@@ -14,16 +14,41 @@
                 android:id="@+id/nameTextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:layout_weight="0.7"/>
-        <TextView
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="right">
+        <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/ShareUpView"/>
+        <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/ShareDownView"/>
+
+
+        </LinearLayout>
+
+        <!--TextView
                 android:id="@+id/ShareData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="right"/>
+                <ImageView
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:id="@+id/ShareView"
                 android:layout_gravity="right"/>
         <TextView
                 android:id="@+id/SData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"/>
+                android:layout_gravity="right"/-->
+
+
     </LinearLayout>
 
     <!--Button

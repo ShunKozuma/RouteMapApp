@@ -4,11 +4,11 @@
         <menu>
             <item
                     android:id="@+id/nav_map"
-                    android:icon="@mipmap/ic_launcher"
+                    android:icon="@mipmap/mapicon"
                     android:title="地図" />
             <item
                     android:id="@+id/nav_map_air"
-                    android:icon="@mipmap/ic_launcher"
+                    android:icon="@mipmap/airmapicon"
                     android:title="航空写真" />
         </menu>
     </item>
@@ -17,20 +17,20 @@
 
         <item
                 android:id="@+id/nav_rain"
-                android:icon="@mipmap/ic_launcher"
+                android:icon="@mipmap/rainicon"
                 android:title="雨雲レーダー" />
         <item
                 android:id="@+id/nav_share"
-                android:icon="@mipmap/ic_launcher"
+                android:icon="@mipmap/shareicon"
                 android:title="共有相手" />
         <item
                 android:id="@+id/nav_find"
-                android:icon="@mipmap/ic_launcher"
+                android:icon="@mipmap/findicon"
                 android:title="ユーザー検索" />
 
         <item
                 android:id="@+id/nav_logout"
-                android:icon="@mipmap/ic_launcher"
+                android:icon="@mipmap/logouticon"
                 android:title="ログアウト" />
 
     </group>
