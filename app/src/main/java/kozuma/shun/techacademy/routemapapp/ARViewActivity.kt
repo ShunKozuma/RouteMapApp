@@ -215,21 +215,13 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
 
         //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
         //mLocationRef!!.addValueEventListener(mEventListener)
-
-        //RouteOverlay作成
-        routeOverlay = RouteOverlay(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
-
-        //出発地ピンの吹き出し設定
-        routeOverlay.setStartTitle("現在地")
-
-        //目的地ピンの吹き出し設定
-        routeOverlay.setGoalTitle("OOさん")
-
         //MyLocationOverlayインスタンス作成
         _overlay = MyLocationOverlay(applicationContext, Map)
 
         //現在位置取得開始
         _overlay!!.enableMyLocation()
+
+
 
         //位置が更新されると、地図の位置も変わるよう設定
         _overlay!!.runOnFirstFix(Runnable {
@@ -240,6 +232,17 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
 
                 var mylat = p.latitude.toString()
                 var mylon = p.longitude.toString()
+
+                //RouteOverlay作成
+                routeOverlay = RouteOverlay(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
+
+                //出発地ピンの吹き出し設定
+                routeOverlay.setStartTitle("現在地")
+
+                //目的地ピンの吹き出し設定
+                routeOverlay.setGoalTitle("OOさん")
+
+
                 //出発地、目的地、移動手段を設定
                 routeOverlay.setRoutePos(
                     GeoPoint(mylat.replace(".", "").toInt(), mylon.replace(".", "").toInt()),
