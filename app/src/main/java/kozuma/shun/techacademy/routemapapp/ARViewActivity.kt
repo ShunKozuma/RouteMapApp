@@ -95,13 +95,13 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
     override fun onGoal(arg0: NaviController): Boolean {
 
         //ARの停止処理
-        arController.onPause()
+        //arController.onPause()
 
         //案内処理を継続しない場合は停止させる
-        naviController.stop()
+        //naviController.stop()
 
         //ARControllerをNaviControllerから削除
-        naviController.setARController(null)
+        //naviController.setARController(null)
 
         //案内処理を継続しない場合は停止させる
         //naviController.stop()
@@ -128,7 +128,7 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
 
 
         //案内処理を開始
-        //naviController.start()
+        naviController.start()
 
 
         //横向き固定
@@ -202,7 +202,6 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
                 ARView(popkeido,popido)
             }
         }
-
     }
 
 

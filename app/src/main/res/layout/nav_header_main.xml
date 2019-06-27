@@ -18,7 +18,7 @@
             android:id="@+id/nav_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textColor="@color/white"/>
 
     <TextView
             android:id="@+id/nav_id"

@@ -118,6 +118,8 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
     private var mHandler = Handler()
 
+    var nowLocationBoolean = true
+
 
     //WeatherOverlayのインターフェース
     override fun finishUpdateWeather(p0: WeatherOverlay?) {
@@ -244,6 +246,11 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             val map = dataSnapshot.value as Map<String, String>
             user_name = map["name"] ?: ""
 
+            println(user_name)
+            navUsername.text = user_name
+            println(navUsername.text)
+
+
         }
 
     }
@@ -327,7 +334,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
 
                 nowfriend.add(nowfriendname)
 
-                navUsername.text = user_name
+                //navUsername.text = user_name
 
                 //リストアラート
                 val alert_menu = arrayOf(nowfriendname)
@@ -556,13 +563,24 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         mLocationRef = mDatabaseReference.child(UsersPATH).child(user)
         mLocationRef!!.addListenerForSingleValueEvent(mEventname)
 
+
+        context = this
+
+
+        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
+
+        recievebutton.setOnClickListener {
+            //val intent = Intent(applicationContext, PopupListActivity::class.java)
+            //startActivity(intent)
+            displayPopupWindow(it)
+        }
+
         //NavigationdrawerのユーザID
         val navigation: NavigationView = findViewById(R.id.nav_view)
         val headerView: View = navigation.getHeaderView(0)
         val navUserid: TextView = headerView.findViewById(R.id.nav_id)
-        navUsername = headerView.findViewById(R.id.nav_name)
-
-        navUsername.text = user_name
+        navUsername= headerView.findViewById(R.id.nav_name)
+        //navUsername.text = user_name
         navUserid.text = user
 
         navUserid.setOnClickListener {
@@ -573,13 +591,44 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
             startActivity(intent)
         }
 
-        context = this
+        ///レイアウト
+        layout = LinearLayout(this)
+        layout.layoutParams =
+            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        // 右部に配置
+        layout.gravity = Gravity.RIGHT or Gravity.BOTTOM
+        // Verticalに設定する
+        layout.orientation = LinearLayout.VERTICAL
 
-        recievebutton.setOnClickListener {
-            //val intent = Intent(applicationContext, PopupListActivity::class.java)
-            //startActivity(intent)
-            displayPopupWindow(it)
+        layout.setPadding(0, 0, 20, 30)
+
+
+        //現在地を表示するボタン
+        currentButton = FloatingActionButton(this)
+        currentButton.setOnClickListener {
+            MyLocationData()
         }
+        //現在地画像
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.now)
+        currentButton.setImageBitmap(bitmap)
+        //ボタン追加
+        layout.addView(currentButton)
+
+
+        //友達リストボタンの追加
+        //val fab = FloatingActionButton(this)
+        fab = FloatingActionButton(this)
+        fab.setOnClickListener {
+            val intent = Intent(applicationContext, ListFriendActivity::class.java)
+            intent.putExtra("button", "0")
+            startActivity(intent)
+        }
+
+        val fabimage = BitmapFactory.decodeResource(resources, R.drawable.plus)
+        fab.setImageBitmap(fabimage)
+        layout.addView(fab)
+
+        Map.addView(layout)
 
 
         // パーミッションの許可状態を確認する
@@ -652,7 +701,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         navigationView.setNavigationItemSelectedListener(this)
 
 
-        adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, nowfriend)
+
 
         Topupanimation = AnimationUtils.loadAnimation(this, R.anim.translate_animation)
         Topdownanimation = AnimationUtils.loadAnimation(this, R.anim.translate_downanimation)
@@ -660,44 +709,6 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
         Enddownanimation = AnimationUtils.loadAnimation(this, R.anim.rightend_downanimation)
 
 
-        ///レイアウト
-        layout = LinearLayout(this)
-        layout.layoutParams =
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-        // 右部に配置
-        layout.gravity = Gravity.RIGHT or Gravity.BOTTOM
-        // Verticalに設定する
-        layout.orientation = LinearLayout.VERTICAL
-
-        layout.setPadding(0, 0, 20, 30)
-
-
-        //現在地を表示するボタン
-        currentButton = FloatingActionButton(this)
-        currentButton.setOnClickListener {
-            MyLocationData()
-        }
-        //現在地画像
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.now)
-        currentButton.setImageBitmap(bitmap)
-        //ボタン追加
-        layout.addView(currentButton)
-
-
-        //友達リストボタンの追加
-        //val fab = FloatingActionButton(this)
-        fab = FloatingActionButton(this)
-        fab.setOnClickListener {
-            val intent = Intent(applicationContext, ListFriendActivity::class.java)
-            intent.putExtra("button", "0")
-            startActivity(intent)
-        }
-
-        val fabimage = BitmapFactory.decodeResource(resources, R.drawable.plus)
-        fab.setImageBitmap(fabimage)
-        layout.addView(fab)
-
-        Map.addView(layout)
     }
 
 
@@ -955,6 +966,7 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
     }
 
     fun MyLocationData() {
+
         //MyLocationOverlayインスタンス作成
         _overlay = MyLocationOverlay(applicationContext, Map)
 
@@ -967,15 +979,26 @@ class MainActivity : AppCompatActivity(), RouteOverlay.RouteOverlayListener, Nav
                 //現在位置を取得
                 p = _overlay!!.myLocation
 
-                //地図移動
-                Map.mapController.animateTo(p)
+
+                if (nowLocationBoolean) {
+                    //MapViewにMyLocationOverlayを追加。
+                    Map.overlays.add(_overlay)
+                    //地図移動
+                    Map.mapController.animateTo(p)
+                    nowLocationBoolean = false
+
+                }else{
+                    Map.mapController.animateTo(p)
+
+                }
+
+
 
 
             }
         })
 
-        //MapViewにMyLocationOverlayを追加。
-        Map.overlays.add(_overlay)
+
 
     }
 
