@@ -88,7 +88,6 @@ class UserFindActivity : AppCompatActivity() {
                         adddata["name"] = name.toString()
                         addRef.setValue(adddata)
 
-
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -121,14 +120,4 @@ class UserFindActivity : AppCompatActivity() {
 
     }
 
-
-
-
-
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        val intent = Intent(applicationContext, FriendsListActivity::class.java)
-//        intent.putExtra( "button", "0" )
-//        startActivity(intent)
-//    }
 }

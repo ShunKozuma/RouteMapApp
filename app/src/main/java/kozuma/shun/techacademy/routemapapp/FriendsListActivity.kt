@@ -105,8 +105,6 @@ class FriendsListActivity : AppCompatActivity() {
 
             mAdapter.notifyDataSetChanged()
 
-            //mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-            //mFriendRef!!.addValueEventListener(mEventRecieveListener)
 
         }
 
@@ -166,9 +164,6 @@ class FriendsListActivity : AppCompatActivity() {
         permissionButton.setOnClickListener {
             NotFriendclick()
         }
-        //pagers.adapter = TabAdapter(supportFragmentManager, this)
-        //tab_layouts.setupWithViewPager(pagers)
-
 
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
@@ -218,71 +213,10 @@ class FriendsListActivity : AppCompatActivity() {
                 // アラートダイアログ
                 alertCheck(addid, addname)
             }
-            /*
-            //友達に位置情報の共有ダイアログ
-            AlertDialog.Builder(this).apply {
-                setTitle("現在地共有")
-                setMessage(addname + "に現在地を共有しますか？")
-                setPositiveButton("共有", DialogInterface.OnClickListener { _, _ ->
-                    location()
-//                    mAdapter.friendSend = addid
-//                    mAdapter.friendPosition = position
-//                    mAdapter.notifyDataSetChanged()
-                    Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
-                })
 
-                setNegativeButton("Cancel", null)
-                show()
-            }*/
 
         }
 
-        /*
-        //ListViewを長押ししたときの処理
-        mListView.setOnItemLongClickListener { parent, _, position, _ ->
-            //選択ユーザのIDとPassを所得
-            addid = mFriendArrayList[position].friend_uid
-            addname = mFriendArrayList[position].name
-
-            if (mbuttonId == true) {
-
-
-                // 友達許可ダイアログを作成して表示
-                AlertDialog.Builder(this).apply {
-                    setTitle("友達申請")
-                    setMessage(addname + "の\n友達申請を許可しますか？")
-                    setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
-                        // OKをタップしたときの処理
-                        FriendListDialog()
-                        Toast.makeText(context, "申請を許可しました！", Toast.LENGTH_LONG).show()
-                    })
-                    setNegativeButton("Cancel", null)
-                    show()
-                }
-
-
-                true
-
-            } else {
-
-                // 友達取り消しダイアログを作成して表示
-                AlertDialog.Builder(this).apply {
-                    setTitle("友達取り消し")
-                    setMessage(addname + "の\n友達を取り消しますか？")
-                    setPositiveButton("OK", DialogInterface.OnClickListener { _, _ ->
-                        // OKをタップしたときの処理
-                        NotFriendDialog()
-                        Toast.makeText(context, "友達を取り消しました！", Toast.LENGTH_LONG).show()
-                    })
-                    setNegativeButton("Cancel", null)
-                    show()
-                }
-
-                true
-
-            }
-
-        }*/
 
     }
 
@@ -301,9 +235,6 @@ class FriendsListActivity : AppCompatActivity() {
                     setMessage(addname + "に現在地を送信しますか？")
                     setPositiveButton("送信", DialogInterface.OnClickListener { _, _ ->
                         location()
-//                    mAdapter.friendSend = addid
-//                    mAdapter.friendPosition = position
-//                    mAdapter.notifyDataSetChanged()
                         Toast.makeText(context, "現在地を共有しました！", Toast.LENGTH_LONG).show()
                     })
                     setNegativeButton("Cancel", null)
@@ -345,13 +276,6 @@ class FriendsListActivity : AppCompatActivity() {
         mListView.adapter = mAdapter
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListener)
-
-        //mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-        //mFriendRef!!.addValueEventListener(mEventRecieveListener)
-
-//        mFriendRef = mDatabaseReference.child(UsersPATH)
-//        mFriendRef!!.addValueEventListener(mEventSendListener)
-
 
     }
 
@@ -445,16 +369,6 @@ class FriendsListActivity : AppCompatActivity() {
     }
 
     fun location() {
-
-//        val senduserRef = mDatabaseReference.child(UsersPATH).child(user).child("senduser_id")
-//
-//        //フレンド追加のデータ
-//        val data = HashMap<String, String>()
-//
-//        //送信相手
-//        data["user_id"] = addid
-//        senduserRef.setValue(data)
-
 
         var mapView = MapView(this, "dj0zaiZpPWowWHRab050ODJyTyZzPWNvbnN1bWVyc2VjcmV0Jng9MzY-")
 

@@ -39,10 +39,6 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
         buttonId = id
     }
 
-//    fun receiveUserId(receiveId: String){
-//        friendRecieve = receiveId
-//    }
-
     fun sendUserId(ju: Boolean, count: Int, sendId: String) {
         println("受け取った$ju$count: $sendId")
         juju = ju
@@ -80,13 +76,6 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
             val nameText = convertView!!.findViewById<View>(R.id.nameTextView) as TextView
             nameText.text = mFriendArrayList[position].name
-
-            //val shareText = convertView!!.findViewById<View>(R.id.ShareData) as TextView
-
-            //val sText = convertView!!.findViewById<View>(R.id.SData) as TextView
-
-            //val shareView = convertView!!.findViewById<View>(R.id.ShareView) as ImageView
-            val shareupView = convertView!!.findViewById<View>(R.id.ShareUpView) as ImageView
             val sharedownView = convertView!!.findViewById<View>(R.id.ShareDownView) as ImageView
 
             println("どっち" + mFriendArrayList[position].sendBoolean)
@@ -94,20 +83,13 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
             if(mFriendArrayList[position].recieveBoolean == true && mFriendArrayList[position].sendBoolean == true){
                 //shareText.text = "現在地送受信中"
-                //shareText.text = "↓"
-                //shareView.setImageResource(R.mipmap.now)
-                //shareupView.setImageResource(R.mipmap.arrowup)
                 sharedownView.setImageResource(R.mipmap.arrowupdown)
 
             }else if (mFriendArrayList[position].sendBoolean == true) {
                 //shareText.text = "現在地送信中"
-                //shareText.text = "↑"
-                //shareView.setImageResource(R.mipmap.now)
                 sharedownView.setImageResource(R.mipmap.arrowup)
             }else if (mFriendArrayList[position].recieveBoolean == true) {
                 //shareText.text = "現在地受信中"
-                //shareText.text = "↑↓"
-                //shareView.setImageResource(R.mipmap.now)
                 sharedownView.setImageResource(R.mipmap.arrowdown)
             }
 
@@ -121,20 +103,7 @@ class FriendsListAdapter(context: Context) : BaseAdapter() {
 
         }
 
-
-        /*
-
-        if(convertView == null){
-            convertView = mLayoutInflater.inflate(R.layout.list_addfriends, parent, false)
-        }
-
-
-        val nameText = convertView!!.findViewById<View>(R.id.nameTextView) as TextView
-        nameText.text = mFriendArrayList[position].name
-        */
-
         return convertView
-
 
     }
 

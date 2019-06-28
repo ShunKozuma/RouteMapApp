@@ -189,13 +189,8 @@ class ListFriendFragment : Fragment() {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
 
             count++
-//            println("配列の行数" + (mFriendArrayList.size - 1))
-//                    && count <= mFriendArrayList.size - 1
             if (dataSnapshot.value != null) {
                 val map = dataSnapshot.value as Map<String, String>
-                //val user_id = map["user_id"] ?: ""
-                //val frienduser_id = dataSnapshot.key?: ""
-
 
                 if (dataSnapshot.value.toString().contains(user)  && count <= mFriendArrayList.size - 1) {
                     mFriendArrayList[count].sendBoolean = true
@@ -205,8 +200,6 @@ class ListFriendFragment : Fragment() {
 
             }
 
-
-            //mAdapter.notifyDataSetChanged()
 
         }
 
@@ -254,16 +247,6 @@ class ListFriendFragment : Fragment() {
         mAdapter.notifyDataSetChanged()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        println("Destroyした" + count)
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-    }
-
 
     fun FriendListclick() {
         //友達リスト
@@ -278,11 +261,6 @@ class ListFriendFragment : Fragment() {
 
         mFriendRef = mDatabaseReference.child(UsersPATH).child(user).child("friend")
         mFriendRef!!.addChildEventListener(mEventListener)
-
-
-
-//        mFriendRecieveRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-//        mFriendRecieveRef!!.addValueEventListener(mEventRecieveListener)
 
 
     }

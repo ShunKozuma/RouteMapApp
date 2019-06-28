@@ -36,11 +36,6 @@ class ListFriendActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list_friend)
 
-//        var res = intent.getStringExtra("TAB_DATA")
-//        if(res == "3"){
-//            adapter.getItem(1)
-//        }
-
 
         val viewPager = findViewById<ViewPager>(R.id.viewPager)
         viewPager.setOffscreenPageLimit(tabTitle.size)
@@ -48,12 +43,5 @@ class ListFriendActivity : AppCompatActivity() {
         val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
         tabLayout.setupWithViewPager(viewPager)
 
-
-
-//        //ユーザー検索画面に遷移
-//        userFindButton.setOnClickListener {
-//            val intent = Intent(applicationContext, UserFindActivity::class.java)
-//            startActivity(intent)
-//        }
     }
 }

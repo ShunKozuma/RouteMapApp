@@ -47,9 +47,6 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
 
     //ARControllerのインターフェース
     override fun ARControllerListenerOnPOIPick(p0: Int) {
-//        finish()
-//        val intent = Intent(applicationContext, MainActivity::class.java)
-//        startActivity(intent)
     }
 
     //NaviControllerのインターフェース
@@ -213,14 +210,11 @@ class ARViewActivity : MapActivity(), RouteOverlay.RouteOverlayListener, NaviCon
         //Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
-        //mLocationRef = mDatabaseReference.child(UsersPATH).child(user).child("location")
-        //mLocationRef!!.addValueEventListener(mEventListener)
         //MyLocationOverlayインスタンス作成
         _overlay = MyLocationOverlay(applicationContext, Map)
 
         //現在位置取得開始
         _overlay!!.enableMyLocation()
-
 
 
         //位置が更新されると、地図の位置も変わるよう設定

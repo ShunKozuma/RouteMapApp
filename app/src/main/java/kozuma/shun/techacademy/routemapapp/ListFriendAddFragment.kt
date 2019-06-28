@@ -192,13 +192,6 @@ class ListFriendAddFragment : Fragment() {
         data["name"] = addname
         addfriendRef.setValue(data)
 
-        //ListViewの準備
-//        mListView = mListViews
-//        mAdapter = FriendsListAdapter(thisis!!)
-//        mFriendArrayList = ArrayList<Friends>()
-//        mAdapter.notifyDataSetChanged()
-
-
     }
 
 }
